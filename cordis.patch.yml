@@ -1,0 +1,6 @@
+# Mount the host-side settings owner and its fixed-namespace browser endpoint.
+- insert:
+    - id: dsh-icon-theme
+      name: dsh-icon-theme
+      # Keep an explicit composition layer for future pack/policy defaults.
+      config: {}
