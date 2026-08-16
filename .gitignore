@@ -1,6 +1,6 @@
 node_modules/
 lib/
-client/
+/client/
 coverage/
 playwright-report/
 test-results/
