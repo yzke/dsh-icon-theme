@@ -27,10 +27,12 @@ DSH 的设置设计强调“基础包声明插槽，设置壳层负责投影，�
 DSH 之前，首版兼容层遵守以下约束：
 
 1. 身份只来自插槽账本的稳定 ID；标签只用于显示。
-2. DOM 与账本按确定顺序相关联，数量或结构不一致就整面停止，不做部分猜测。
+2. 设置导航在 DOM 与账本数量或结构不一致时整面停止；侧边栏先尝试完整顺序映射，
+   数量不一致时只接受唯一、经过源码审核的语义 class / data 指纹，其余目标不猜测。
 3. 不删除宿主 SVG，只插入拥有明确 data 属性的 mask glyph。
 4. 插件卸载、HMR 或页面重绘后，所有自有节点和属性都可恢复。
-5. 不依赖 CSS Modules 生成的哈希类名。
+5. 不依赖 CSS Modules 生成的哈希类名；少量侧边栏指纹必须是插件源码持有的稳定语义名，
+   并各自有未渲染、非图标、歧义和卸载恢复测试。
 
 社区已有相同需求的证据：`DSH-better-sidebar` 在 0.1.x 中通过
 `MutationObserver` 找到自己的本地化设置行、加 data 标记，再用 CSS mask 隐藏齿轮。
@@ -78,7 +80,7 @@ DSH primitives 当前约 70 枚图标，注释明确说明它们来自 DeepSuite
 
 因此 `@fluentui/svg-icons` 仅是开发依赖。生成脚本读取明确的 16 Regular 文件，拒绝
 script、image、style、事件、远程 URL 和硬编码色值，生成本地 TypeScript 常量。
-最终浏览器 bundle 约 65 KB、gzip 约 18 KB，不包含完整 Fluent 包。
+最终浏览器 bundle 约 73 KB、gzip 约 21 KB，不包含完整 Fluent 包。
 
 ## 初始图标清单
 
@@ -111,3 +113,15 @@ script、image、style、事件、远程 URL 和硬编码色值，生成本地 T
 “设置 → 图标”页面显示发现总数、两类表面兼容状态、搜索和筛选。每行展示当前预览、
 用户可读标签、稳定键、解析来源，以及“更改 / 恢复自动”。图标选择器支持中英文别名
 搜索。配置只保存手动覆盖与原图策略；检测结果、标签、DOM 索引和默认映射均不落盘。
+
+## 配置持久化边界
+
+DSH 0.1.0-rc.6 的通用 `settingsScope` Web 协议只暴露产品白名单和可配置模型供应商；
+单纯注册第三方设置命名空间仍会得到 `settings-not-exposed`。图标主题不是模型供应商，
+因此不会用虚假的 provider 条目绕过边界，也不会修改用户安装的 DSH bundle。
+
+Host 端改为提供 `/_dsh/icon-theme/settings` 固定端点：只接受 POST、同源 Fetch Metadata
+以及非简单请求头，只能对 `pack`、`overrides`、`originalPolicy` 三个顶层路径执行
+Settings mutate，并携带 revision 做冲突检测。它继续使用 DSH Settings provider 落盘，但
+无法枚举或修改其他命名空间。浏览器端首次读取失败时明确进入只读状态，不会静默写入
+localStorage 形成两个真相来源。

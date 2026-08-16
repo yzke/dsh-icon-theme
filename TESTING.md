@@ -20,17 +20,25 @@ npm pack --dry-run
    icon picking, live source changes, filtering, and reset behavior.
 5. **Lifecycle and build** — fake DSH context verifies registrations,
    subscriptions, observers, styles, and markers are owned and released.
-6. **Browser fixture** — real Chromium executes the produced
+6. **Settings wire** — Host and browser tests enforce the fixed namespace,
+   same-origin non-simple header, top-level path allowlist, revision forwarding,
+   unavailable state, and DSH Settings persistence.
+7. **Ecosystem fixtures** — registrations pinned from five open-source plugins
+   prove generic discovery of an unknown Settings section, safe gear fallback,
+   manual override, and non-interference with unrelated slot surfaces.
+8. **Browser fixture** — real Chromium executes the produced
    `window.__ModuleLoader__` artifact against representative Settings/sidebar
-   DOM and confirms original SVG restoration.
-7. **Real DSH smoke** — after local installation, run:
+   DOM, confirms non-empty mask pixels, and restores original SVGs.
+9. **Real DSH smoke** — after local installation, run:
 
    ```bash
    DSH_E2E_URL=http://127.0.0.1:3080 npm run test:web -- -t @real-dsh
    ```
 
-   The test opens Settings → Icons, verifies live discovery, makes one manual
-   Market override, and restores automatic selection before exiting.
+   The test opens Settings → Icons, verifies live discovery and friendly sidebar
+   names, changes the rendered Import Conversations icon, changes the Market
+   icon, verifies both real DOM updates, and restores automatic selection before
+   exiting.
 
 ## Regression requirements
 

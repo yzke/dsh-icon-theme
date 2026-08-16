@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
-import { apply, inject } from '../src/client/index.tsx'
+import { applyWithSettings, inject } from '../src/client/index.tsx'
 import type { SettingsScopeLike } from '../src/client/store.ts'
 
 afterEach(() => { document.body.innerHTML = ''; document.head.querySelectorAll('[data-plugin="dsh-icon-theme"]').forEach(node => node.remove()) })
@@ -65,10 +65,9 @@ describe('client lifecycle', () => {
         subscribe: (listener: () => void) => { subscriptions.add(listener); return () => subscriptions.delete(listener) },
       },
       slots,
-      iconThemeSettings: scope,
     }
 
-    apply(ctx)
+    applyWithSettings(ctx, scope)
     expect(settingsEntries.some(entry => entry.options.id === 'icon-theme')).toBe(true)
     expect(document.head.querySelector('[data-plugin="dsh-icon-theme"]')).not.toBeNull()
 

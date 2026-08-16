@@ -1,60 +1,96 @@
 # dsh-icon-theme
 
-为 DeepSeek Harness 的设置导航和侧边栏功能自动分配、统一并允许手动更改图标。
+[English](README.md) | 简体中文
 
-## 能做什么
+为 DeepSeek Harness 的设置导航和侧边栏功能自动分配统一图标，并支持逐项手动更改。
 
-- 从 `settings.section` 与 `sidebar.footer.action` 插槽账本实时发现当前功能。
-- 以稳定 ID 保存选择，切换中英文、排序或重载界面不会丢失映射。
-- 默认保留 DSH 和插件已有的专用图标，只替换设置页里重复出现的通用齿轮。
-- 内置 50 个 Fluent UI 16 Regular 图标，以及经过审核的 dsh-market 原图标。
-- 每个目标都显示来源：手动、插件自带、预设、自动推断、原图标或安全回退。
-- 完全离线；运行时不请求 Iconify、CDN、GitHub 或任意远程 SVG。
-- 卸载或热重载时恢复宿主原始 SVG，不留下 DOM 标记。
+![设置页总览](docs/images/settings-overview.png)
 
-## 兼容性
+## 为什么做这个插件
 
-首版面向 DSH `>=0.1.0-rc.6 <0.2.0`。DSH 0.1.x 的
-`settings.section` 只公开 `id`、`order`、`label`，设置壳层内部才决定图标，
-因此插件使用一个严格、可逆、遇到结构不一致就停止工作的兼容层。它不依赖
-CSS Modules 哈希类名，也不把本地化文字当作持久化 ID。
+DSH 0.1.x 的设置贡献提供稳定 ID 和名称，但尚未提供图标字段，所以许多第三方页面都会回退成相同的齿轮。`dsh-icon-theme` 从实时插槽账本发现功能，优先保留可信原图标，用一套精简的 Fluent 风格图标补齐缺口，并允许用户覆盖每一项。
 
-设置页功能可以完整识别。侧边栏只处理 `sidebar.footer.action` 中拥有单一根节点、
-且按钮直接包含 SVG 的项目；余额卡片等非图标行会明确跳过。
+- 实时识别 `settings.section` 和 `sidebar.footer.action`，不把当前安装的插件名单写死在代码里。
+- 用 `settings.section:market` 这样的稳定键保存选择，不依赖中文、英文或 DOM 顺序。
+- 内置 50 个 Fluent UI 16 Regular 图标，以及经过审核的 dsh-market 单色原图标。
+- 运行时不请求图标 CDN、Iconify、GitHub、webfont，也不扫描其他插件包。
+- 卸载或热重载时完整恢复宿主 SVG 和插件添加的 DOM 标记。
+- 明确区分“当前未渲染”和“非图标卡片”，不会假装已经更改成功。
+- 目标既没有可信匹配、也没有原图标时，统一使用设置齿轮回退。
 
-## 开发期安装
+## 安装
+
+npm 包目前尚未发布。当前版本可以从源码安装：
 
 ```bash
-npm install
-npm run qa
-dsh plugin --profile web add link:/absolute/path/to/dsh-icon-theme
+git clone https://github.com/yzke/dsh-icon-theme.git
+cd dsh-icon-theme
+npm ci
+npm run build
+dsh plugin --profile web add link:"$PWD"
 ```
 
-安装后重启 `dsh web`，打开“设置 → 图标”。正式发布到 npm 后可改用：
+重启 `dsh web`，打开“设置 → 图标”。
+
+首次发布到 npm 后，安装命令会简化为：
 
 ```bash
 dsh plugin --profile web add dsh-icon-theme
 ```
 
-## 默认映射
+兼容范围：DSH `>=0.1.0-rc.6 <0.2.0`。从源码构建需要 Node.js 22 或更高版本。
 
-| 功能 ID | 默认行为 |
+## 使用方式
+
+图标页会列出所有已发现目标、稳定键、兼容状态和当前图标来源。可以按功能名、ID 或图标搜索，也可以筛选设置、侧边栏、未识别和已自定义项目；支持逐项选择、逐项恢复自动和全部恢复自动。
+
+![图标选择器](docs/images/icon-picker.png)
+
+解析顺序固定为：
+
+1. 用户手动覆盖。
+2. 已审核并随包附带的插件原图标。
+3. 可信的 DSH / 插件现有图标。
+4. 稳定 ID 精确预设。
+5. 稳定 ID 的无歧义语义推断。
+6. 宿主已有回退图标；完全没有原图标时使用设置齿轮。
+
+中英文名称只用于展示和搜索，不参与持久化映射。
+
+## 侧边栏如何处理
+
+| 状态 | 行为 |
 | --- | --- |
-| `general`、`models`、`plugins`、`agent-presets` | 保留 DSH 原生图标 |
-| `market` | dsh-market 自带九宫格图标 |
-| `dsh-mneme` | 记忆 / Brain |
-| `cost-meter` | 钱包 / Wallet |
-| `dsh-mineru` | PDF 文档 |
-| `at-file` | 文件提及 |
-| `notification` | 通知铃 |
-| `better-sidebar` | 优先保留插件自己的图标；没有时用侧边卡片 |
-| `chat-import`、`usage-stats`、`bookmarks` | 优先保留侧边栏已渲染的插件图标 |
+| 已渲染的图标按钮 | 可以更改，默认优先保留原图标。 |
+| 已注册但当前未渲染 | 显示“可预设”，出现时自动应用。 |
+| 非图标卡片 | 明确报告，但不破坏卡片布局。 |
+| 未知或结构变化的 DOM | 保持不动；只有唯一且经过审核的指纹才会匹配。 |
 
-完整架构、热门插件抽样和取舍见 [docs/design.md](docs/design.md)，测试分层见
-[TESTING.md](TESTING.md)。
+DSH 0.1.x 尚未提供公共图标解析接口，因此当前兼容层刻意保持范围小、可逆、遇到歧义就停。完整契约和上游建议见[设计文档](docs/design.md)。
+
+## 外部插件兼容验证
+
+测试固定抽取了真实开源项目的注册信息，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。
+
+## 开发与发布门槛
+
+```bash
+npm ci
+npm run qa
+npm run test:web
+npm pack --dry-run
+```
+
+可选的真实 DSH 冒烟测试：
+
+```bash
+DSH_E2E_URL=http://127.0.0.1:3080 npm run test:web -- -t @real-dsh
+```
+
+完整测试分层见 [TESTING.md](TESTING.md)，图标来源和许可证见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 ## 隐私与安全
 
-自动识别只读取 DSH 已公开的插槽元数据和当前页面结构。插件不会扫描用户文件，
-不会解析其他插件的编译产物，也不会从 README、favicon 或任意远程地址猜测图标。
-自带图标只有在来源、许可证和 16 px 单色适配均审核通过后才进入精确适配表。
+自动识别只读取 DSH 插槽元数据和两个受支持界面的当前 DOM，不读取用户文件，也不解析其他插件的编译产物。配置通过固定命名空间、同源限定的 Host 接口保存；接口只接受 `pack`、`overrides` 和 `originalPolicy`，不能读取或修改其他插件的配置。
+
+MIT 许可证。

@@ -25,17 +25,23 @@ interface IconThemeClientContext {
   effect: (callback: () => unknown, label?: string) => void
   locale: LocaleServiceLike
   slots: SlotsServiceLike
-  /** Test-only seam; production uses the plugin-owned Host settings endpoint. */
-  iconThemeSettings?: SettingsScopeLike
 }
 
 export const name = 'dsh-icon-theme'
 export const inject = ['slots', 'locale']
 
 export function apply(ctx: IconThemeClientContext): void {
+  install(ctx, createHostSettingsScope())
+}
+
+/** Deterministic test harness entry; the DSH loader calls {@link apply}. */
+export function applyWithSettings(ctx: IconThemeClientContext, scope: SettingsScopeLike): void {
+  install(ctx, scope)
+}
+
+function install(ctx: IconThemeClientContext, scope: SettingsScopeLike): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'dsh-icon-theme: dictionaries')
   const t = ctx.locale.bind(NS)
-  const scope = ctx.iconThemeSettings ?? createHostSettingsScope()
   const store = createIconThemeStore(scope, ctx.slots)
   ctx.effect(() => () => store.dispose(), 'dsh-icon-theme: store')
   ctx.effect(() => ctx.locale.subscribe(store.refresh), 'dsh-icon-theme: locale refresh')

@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:web": "npm run build && vitest run --config vitest.web.config.ts",
     "preflight": "node scripts/preflight.mjs",
-    "qa": "npm run typecheck && npm run test && npm run build && npm run preflight"
+    "qa": "npm run typecheck && npm run test && npm run build && npm run preflight",
+    "prepack": "npm run qa"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "^3.18.1"
@@ -94,6 +95,10 @@
     "dsh.plugin.json",
     "README.md",
     "README.zh.md",
+    "TESTING.md",
+    "docs/design.md",
+    "docs/ecosystem-compatibility.md",
+    "docs/images",
     "THIRD_PARTY_NOTICES.md",
     "LICENSE"
   ],
@@ -102,5 +107,13 @@
   },
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yzke/dsh-icon-theme.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yzke/dsh-icon-theme/issues"
+  },
+  "homepage": "https://github.com/yzke/dsh-icon-theme#readme"
 }

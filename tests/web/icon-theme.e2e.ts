@@ -60,17 +60,12 @@ describe('built client compatibility fixture', () => {
       const slotListeners = new Map<string, Set<() => void>>()
       const effects: Array<() => void> = []
       const injected: Array<() => void> = []
-      const scopeListeners = new Set<() => void>()
-      const scope = {
-        getSnapshot: () => ({
-          status: 'ready',
-          writable: true,
-          value: { overrides: { 'sidebar.footer.action:bookmarks': 'apps' } },
-        }),
-        subscribe: (listener: () => void) => { scopeListeners.add(listener); return () => scopeListeners.delete(listener) },
-        set: async () => {},
-        unset: async () => {},
-      }
+      window.fetch = async () => new Response(JSON.stringify({
+        ok: true,
+        revision: 0,
+        writable: true,
+        value: { overrides: { 'sidebar.footer.action:bookmarks': 'apps' } },
+      }), { status: 200, headers: { 'content-type': 'application/json' } })
       const slots = {
         entries: (name: string) => name === 'settings.section' ? settingsEntries : sidebarEntries,
         subscribe: (name: string, listener: () => void) => {
@@ -107,7 +102,6 @@ describe('built client compatibility fixture', () => {
           subscribe: () => () => {},
         },
         slots,
-        iconThemeSettings: scope,
       }
       ;(window as unknown as Record<string, unknown>).__ModuleLoader__ = {
         load: ({ factory }: { factory: (require: (id: string) => unknown) => { apply: (ctx: unknown) => void } }) => {
@@ -146,7 +140,7 @@ describe.skipIf(!process.env.DSH_E2E_URL)('real DSH smoke @real-dsh', () => {
   it('shows detected targets and supports a reversible manual override', async () => {
     const page = await browser.newPage()
     await page.goto(process.env.DSH_E2E_URL!, { waitUntil: 'domcontentloaded' })
-    const settings = page.getByRole('button', { name: /^(设置|Settings)$/ })
+    const settings = page.getByRole('button', { name: /(设置|Settings)/ })
     await settings.click()
     const dialog = page.getByRole('dialog')
     await dialog.getByRole('button', { name: /^(图标|Icons)$/ }).click()
