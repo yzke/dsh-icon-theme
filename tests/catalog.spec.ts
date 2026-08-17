@@ -11,6 +11,8 @@ describe('icon catalog', () => {
       expect(withoutNamespace).not.toMatch(/<script|<image|<style|\son\w+\s*=|https?:|#[0-9a-f]{3,8}/i)
       expect(icon.source).not.toBe('')
       expect(icon.license).not.toBe('')
+      expect(icon.label).not.toBe('')
+      expect(icon.labelEn).not.toBe('')
     }
   })
 })

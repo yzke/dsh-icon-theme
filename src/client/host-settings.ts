@@ -16,6 +16,7 @@ export class HostSettingsScope implements SettingsScopeLike {
   private snapshot: SettingsScopeSnapshotLike = { status: 'loading', value: {}, writable: false }
   private revision: number | undefined
   private listeners = new Set<() => void>()
+  private writeTail: Promise<void> = Promise.resolve()
 
   constructor(private readonly fetcher: FetchLike = globalThis.fetch.bind(globalThis)) {
     void this.reload()
@@ -29,11 +30,17 @@ export class HostSettingsScope implements SettingsScopeLike {
   }
 
   set = async (field: string, value: unknown): Promise<void> => {
-    await this.mutate([{ op: 'set', path: [field], value }])
+    await this.enqueue([{ op: 'set', path: [field], value }])
   }
 
   unset = async (field: string): Promise<void> => {
-    await this.mutate([{ op: 'unset', path: [field] }])
+    await this.enqueue([{ op: 'unset', path: [field] }])
+  }
+
+  private enqueue(ops: unknown[]): Promise<void> {
+    const operation = this.writeTail.then(() => this.mutate(ops))
+    this.writeTail = operation.catch(() => {})
+    return operation
   }
 
   private async mutate(ops: unknown[]): Promise<void> {

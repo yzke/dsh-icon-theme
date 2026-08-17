@@ -12,10 +12,11 @@ export interface IconPickerProps {
 
 export function IconPicker({ current, t, onChoose, onClose }: IconPickerProps) {
   const [query, setQuery] = useState('')
+  const isEnglish = t('localeCode') === 'en'
   const icons = useMemo(() => {
     const needle = query.trim().toLowerCase()
     if (!needle) return ICON_CATALOG
-    return ICON_CATALOG.filter(icon => [icon.id, icon.label, ...icon.aliases].some(value => value.toLowerCase().includes(needle)))
+    return ICON_CATALOG.filter(icon => [icon.id, icon.label, icon.labelEn, ...icon.aliases].some(value => value.toLowerCase().includes(needle)))
   }, [query])
 
   return (
@@ -34,19 +35,22 @@ export function IconPicker({ current, t, onChoose, onClose }: IconPickerProps) {
           onChange={event => setQuery(event.target.value)}
         />
         <div className="dit-grid">
-          {icons.map(icon => (
+          {icons.map(icon => {
+            const label = isEnglish ? icon.labelEn : icon.label
+            return (
             <button
               type="button"
               className="dit-grid-item"
               key={icon.id}
               aria-current={current === icon.id ? 'true' : undefined}
-              title={`${icon.label} · ${icon.id}`}
+              title={`${label} · ${icon.id}`}
               onClick={() => onChoose(icon.id)}
             >
               <IconGlyph iconId={icon.id} />
-              <span>{icon.label}</span>
+              <span>{label}</span>
             </button>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

@@ -15,6 +15,25 @@ const labels: Partial<Record<FluentIconName, string>> = {
   home: '主页', info: '信息', warning: '警告', cloud: '云端', window_apps: '应用窗口',
 }
 
+const labelsEn: Partial<Record<FluentIconName, string>> = {
+  settings: 'Settings', brain: 'Memory', database: 'Data', apps: 'Apps', store_microsoft: 'Marketplace',
+  alert: 'Notifications', wallet: 'Wallet', money: 'Costs', receipt_money: 'Bill', document_pdf: 'PDF',
+  document_text: 'Document', document_mention: 'File mention', folder: 'Folder', folder_open: 'Open folder',
+  archive: 'Archive', bookmark: 'Bookmark', arrow_import: 'Import', arrow_export: 'Export',
+  arrow_download: 'Download', arrow_upload: 'Upload', shield: 'Security', shield_lock: 'Security lock',
+  key: 'Key', lock_closed: 'Locked', eye: 'Vision', image: 'Image', search: 'Search',
+  globe: 'Network', code: 'Code', plug_connected: 'Connector', toolbox: 'Toolbox', wrench: 'Tools',
+  sparkle: 'Enhance', paint_brush: 'Appearance', color: 'Color', grid: 'Grid', panel_left: 'Left sidebar',
+  panel_right: 'Right sidebar', panel_right_gallery: 'Sidebar card', chart_multiple: 'Statistics',
+  history: 'History', calendar: 'Calendar', chat: 'Conversation', people: 'Team', person: 'User',
+  home: 'Home', info: 'Information', warning: 'Warning', cloud: 'Cloud', window_apps: 'App window',
+}
+
+function englishFallback(id: string): string {
+  const value = id.replaceAll('_', ' ')
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 const categories: Partial<Record<FluentIconName, IconCategory>> = {
   settings: 'core', apps: 'core', store_microsoft: 'core', person: 'core', people: 'core', home: 'core',
   document_pdf: 'content', document_text: 'content', document_mention: 'content', folder: 'content',
@@ -51,6 +70,7 @@ const fluentCatalog: IconDef[] = Object.entries(GENERATED_FLUENT_ICONS).map(([id
   return {
     id,
     label: labels[name] ?? id.replaceAll('_', ' '),
+    labelEn: labelsEn[name] ?? englishFallback(id),
     category: categories[name] ?? 'core',
     aliases: aliases[name] ?? [],
     svg,
@@ -65,6 +85,7 @@ export const ICON_CATALOG: readonly IconDef[] = Object.freeze([
   {
     id: 'plugin.market',
     label: 'dsh-market',
+    labelEn: 'dsh-market',
     category: 'plugin',
     aliases: ['market', 'marketplace', 'dshmarket', '插件市场'],
     svg: marketSvg,

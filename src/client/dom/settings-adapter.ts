@@ -2,7 +2,7 @@ import { NATIVE_SETTINGS_IDS } from '../presets.ts'
 import type { DetectedTarget } from '../types.ts'
 import type { AdapterOptions, AdapterReport } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
-import { applyOwnedIcon, clearOwnedIcon } from './owned-icon.ts'
+import { applyOwnedIcon, clearOwnedIcon, ownedIconMatches } from './owned-icon.ts'
 
 interface SettingsMatch {
   buttons: HTMLButtonElement[]
@@ -15,17 +15,29 @@ function directSvg(element: Element): SVGElement | undefined {
 
 export function findSettingsMatch(targets: readonly DetectedTarget[]): SettingsMatch | null {
   if (targets.length === 0) return null
-  for (const dialog of document.querySelectorAll<HTMLElement>('[role="dialog"]')) {
+  const matches: SettingsMatch[] = []
+  for (const dialog of settingsDialogs()) {
     for (const nav of dialog.querySelectorAll<HTMLElement>('nav')) {
       const buttons = Array.from(nav.querySelectorAll<HTMLButtonElement>('button'))
         .filter(button => button.closest('nav') === nav)
       if (buttons.length !== targets.length) continue
       if (!buttons.some(button => button.hasAttribute('aria-current'))) continue
       if (!buttons.every(button => directSvg(button) !== undefined)) continue
-      return { buttons, targets }
+      matches.push({ buttons, targets })
     }
   }
-  return null
+  return matches.length === 1 ? matches[0]! : null
+}
+
+function settingsDialogs(): HTMLElement[] {
+  return Array.from(document.querySelectorAll<HTMLElement>('[role="dialog"]')).filter(dialog => {
+    const labelledBy = dialog.getAttribute('aria-labelledby')
+    if (!labelledBy) return false
+    const label = document.getElementById(labelledBy)
+    const header = dialog.querySelector<HTMLElement>('[data-slot="settings.header"]')
+    return label !== null && header !== null && dialog.contains(label)
+      && (label === header || label.contains(header))
+  })
 }
 
 export function mountSettingsAdapter(options: AdapterOptions): () => void {
@@ -48,7 +60,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
     const match = findSettingsMatch(targets)
     if (!match) {
       clearAll()
-      const hasDialog = document.querySelector('[role="dialog"]') !== null
+      const hasDialog = settingsDialogs().length > 0
       report({
         status: hasDialog ? 'unsupported' : 'waiting',
         managed: 0,
@@ -74,7 +86,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
       }
       desired.add(button)
       managed += 1
-      if (button.dataset.dshIconThemeIcon === resolution.iconId && button.dataset.dshIconThemeId === target.id) continue
+      if (ownedIconMatches(button, target, resolution.iconId)) continue
       disposers.get(button)?.()
       disposers.set(button, applyOwnedIcon(button, target, resolution))
     }
@@ -101,7 +113,12 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
 
   sync()
   const observer = new MutationObserver(schedule)
-  observer.observe(document.body, { childList: true, subtree: true })
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['role', 'id', 'aria-labelledby', 'aria-current', 'data-slot', 'data-dsh-icon-theme-managed'],
+  })
   const unsubscribe = options.subscribe?.(schedule) ?? (() => {})
 
   return () => {

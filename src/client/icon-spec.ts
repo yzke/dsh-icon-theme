@@ -8,7 +8,10 @@ export type IconCategory =
 
 export interface IconDef {
   id: string
+  /** Chinese display label. */
   label: string
+  /** English display label. */
+  labelEn: string
   category: IconCategory
   aliases: readonly string[]
   svg: string

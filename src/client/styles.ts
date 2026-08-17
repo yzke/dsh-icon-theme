@@ -45,12 +45,22 @@ export const STYLE_TEXT = `
 `
 
 export function installStyles(): () => void {
-  const existing = document.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_ID}"]`)
-  if (existing) return () => {}
-  const tag = document.createElement('style')
-  tag.dataset.plugin = 'dsh-icon-theme'
-  tag.dataset.pluginCss = STYLE_ID
-  tag.textContent = STYLE_TEXT
-  document.head.appendChild(tag)
-  return () => tag.remove()
+  let tag = document.querySelector<HTMLStyleElement>(`style[data-plugin-css="${STYLE_ID}"]`)
+  if (!tag) {
+    tag = document.createElement('style')
+    tag.dataset.plugin = 'dsh-icon-theme'
+    tag.dataset.pluginCss = STYLE_ID
+    tag.textContent = STYLE_TEXT
+    document.head.appendChild(tag)
+  }
+  const users = Number.parseInt(tag.dataset.pluginCssUsers ?? '0', 10)
+  tag.dataset.pluginCssUsers = String(Number.isFinite(users) ? users + 1 : 1)
+  let active = true
+  return () => {
+    if (!active) return
+    active = false
+    const remaining = Math.max(0, Number.parseInt(tag.dataset.pluginCssUsers ?? '1', 10) - 1)
+    if (remaining === 0) tag.remove()
+    else tag.dataset.pluginCssUsers = String(remaining)
+  }
 }

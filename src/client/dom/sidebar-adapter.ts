@@ -1,7 +1,8 @@
 import type { DetectedTarget } from '../types.ts'
+import { hasSidebarCompatibilityFingerprint, matchesSidebarCompatibility } from '../sidebar-compat.ts'
 import type { AdapterOptions, TargetAdapterStatus } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
-import { applyOwnedIcon } from './owned-icon.ts'
+import { applyOwnedIcon, ownedIconMatches } from './owned-icon.ts'
 
 function directSvg(element: Element): SVGElement | undefined {
   return Array.from(element.children).find(child => child.tagName.toLowerCase() === 'svg') as SVGElement | undefined
@@ -14,26 +15,11 @@ function iconAction(root: HTMLElement): HTMLElement | null {
   return null
 }
 
-type SidebarFingerprint = (root: HTMLElement) => boolean
-
 function accessibleName(root: HTMLElement): string {
   const action = iconAction(root) ?? root
   const value = action.getAttribute('aria-label') || action.getAttribute('title') || action.textContent || ''
   return value.trim().replace(/\s+/g, ' ')
 }
-
-const SIDEBAR_FINGERPRINTS: Readonly<Record<string, SidebarFingerprint>> = Object.freeze({
-  'chat-import': root => root instanceof HTMLButtonElement
-    && /(?:导入会话|import(?:\s+|.*)(?:chat|conversation))/i.test(accessibleName(root)),
-  'cordis-panel': root => root.matches('[data-cordis-panel], .cordis-panel')
-    || /cordis/i.test(`${root.className} ${accessibleName(root)}`),
-  'cost-meter': root => root.matches('.cm-footer-stack')
-    || /(?:余额.*预算|balance.*budget)/i.test(accessibleName(root)),
-  bookmarks: root => root.matches('.dshbm_footerAction')
-    || /(?:收藏中心|归档|bookmark|favorite|archive)/i.test(accessibleName(root)),
-  'usage-stats': root => root.matches('[data-usage-stats], .us-nav')
-    || /(?:使用统计|usage\s+stat)/i.test(accessibleName(root)),
-})
 
 export function matchSidebarRoots(
   targets: readonly DetectedTarget[],
@@ -41,8 +27,8 @@ export function matchSidebarRoots(
 ): Map<DetectedTarget, HTMLElement> {
   if (roots.length === targets.length) {
     const exactOrderIsSafe = targets.every((target, index) => {
-      const fingerprint = SIDEBAR_FINGERPRINTS[target.id]
-      return !fingerprint || fingerprint(roots[index]!)
+      return !hasSidebarCompatibilityFingerprint(target.id)
+        || matchesSidebarCompatibility(target.id, roots[index]!, accessibleName(roots[index]!))
     })
     if (exactOrderIsSafe) return new Map(targets.map((target, index) => [target, roots[index]!]))
   }
@@ -50,9 +36,9 @@ export function matchSidebarRoots(
   const matches = new Map<DetectedTarget, HTMLElement>()
   const claimed = new Set<HTMLElement>()
   for (const target of targets) {
-    const fingerprint = SIDEBAR_FINGERPRINTS[target.id]
-    if (!fingerprint) continue
-    const candidates = roots.filter(root => !claimed.has(root) && fingerprint(root))
+    if (!hasSidebarCompatibilityFingerprint(target.id)) continue
+    const candidates = roots.filter(root => !claimed.has(root)
+      && matchesSidebarCompatibility(target.id, root, accessibleName(root)))
     if (candidates.length !== 1) continue
     matches.set(target, candidates[0]!)
     claimed.add(candidates[0]!)
@@ -61,10 +47,12 @@ export function matchSidebarRoots(
 }
 
 export function mountSidebarAdapter(options: AdapterOptions): () => void {
+  const slotSelector = '[data-slot="sidebar.footer.action"]'
   const disposers = new Map<HTMLElement, () => void>()
   const emit = reportOnce('sidebar.footer.action', options.onReport)
   let disposed = false
   let scheduled = false
+  let observedSlot: HTMLElement | null = null
 
   const clearAll = (): void => {
     for (const dispose of disposers.values()) dispose()
@@ -75,7 +63,20 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
     scheduled = false
     if (disposed) return
     const targets = options.getTargets().filter(target => target.surface === 'sidebar.footer.action')
-    const slot = document.querySelector<HTMLElement>('[data-slot="sidebar.footer.action"]')
+    const slot = document.querySelector<HTMLElement>(slotSelector)
+    if (slot !== observedSlot) {
+      slotObserver.disconnect()
+      observedSlot = slot
+      if (slot) {
+        slotObserver.observe(slot, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+          attributes: true,
+          attributeFilter: ['data-slot', 'data-cordis-panel', 'data-usage-stats', 'class', 'aria-label', 'title', 'data-dsh-icon-theme-managed'],
+        })
+      }
+    }
     if (!slot) {
       clearAll()
       emit({
@@ -118,7 +119,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
       }
       desired.add(action)
       managed += 1
-      if (action.dataset.dshIconThemeIcon === resolution.iconId && action.dataset.dshIconThemeId === target.id) continue
+      if (ownedIconMatches(action, target, resolution.iconId)) continue
       disposers.get(action)?.()
       disposers.set(action, applyOwnedIcon(action, target, resolution))
     }
@@ -146,13 +147,34 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
     queueMicrotask(sync)
   }
 
+  const slotObserver = new MutationObserver(schedule)
+  const containsSlot = (node: Node): boolean => node instanceof Element
+    && (node.matches(slotSelector) || node.querySelector(slotSelector) !== null)
+  const bodyObserver = new MutationObserver(records => {
+    const relevant = records.some(record => {
+      if (record.type === 'attributes') {
+        return record.target === observedSlot
+          || (record.target instanceof Element && record.target.matches(slotSelector))
+      }
+      return Array.from(record.addedNodes).some(containsSlot)
+        || Array.from(record.removedNodes).some(node => node === observedSlot
+          || (node instanceof Element && observedSlot !== null && node.contains(observedSlot)))
+    })
+    if (relevant) schedule()
+  })
+
   sync()
-  const observer = new MutationObserver(schedule)
-  observer.observe(document.body, { childList: true, subtree: true })
+  bodyObserver.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['data-slot'],
+  })
   const unsubscribe = options.subscribe?.(schedule) ?? (() => {})
   return () => {
     disposed = true
-    observer.disconnect()
+    bodyObserver.disconnect()
+    slotObserver.disconnect()
     unsubscribe()
     clearAll()
   }

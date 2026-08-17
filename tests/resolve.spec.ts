@@ -17,7 +17,7 @@ describe('resolveIcon', () => {
     ['settings.section:unfamiliar-folder-tool', 'folder', 'inferred'],
   ] as const)('%s resolves to %s', (key, iconId, source) => {
     expect(resolveIcon(target(key), { ...DEFAULT_CONFIG, overrides: {} }, { hasOriginal: false, originalIsGeneric: true }))
-      .toMatchObject({ iconId, source })
+      .toMatchObject({ iconId, source, reason: source === 'plugin' ? 'reasonPlugin' : source === 'preset' ? 'reasonPreset' : 'reasonInferred' })
   })
 
   it('manual overrides win over curated plugin icons', () => {

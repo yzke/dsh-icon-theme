@@ -10,7 +10,7 @@
 
 DSH 0.1.x 的设置贡献提供稳定 ID 和名称，但尚未提供图标字段，所以许多第三方页面都会回退成相同的齿轮。`dsh-icon-theme` 从实时插槽账本发现功能，优先保留可信原图标，用一套精简的 Fluent 风格图标补齐缺口，并允许用户覆盖每一项。
 
-- 实时识别 `settings.section` 和 `sidebar.footer.action`，不把当前安装的插件名单写死在代码里。
+- 通用识别实时生效且经过优先级遮蔽后的 `settings.section` 和 `sidebar.footer.action`；只有侧边栏部分渲染、无法按顺序对应时，才使用经过审核的插件兼容记录。
 - 用 `settings.section:market` 这样的稳定键保存选择，不依赖中文、英文或 DOM 顺序。
 - 内置 50 个 Fluent UI 16 Regular 图标，以及经过审核的 dsh-market 单色原图标。
 - 运行时不请求图标 CDN、Iconify、GitHub、webfont，也不扫描其他插件包。
@@ -64,13 +64,13 @@ dsh plugin --profile web add dsh-icon-theme
 | 已渲染的图标按钮 | 可以更改，默认优先保留原图标。 |
 | 已注册但当前未渲染 | 显示“可预设”，出现时自动应用。 |
 | 非图标卡片 | 明确报告，但不破坏卡片布局。 |
-| 未知或结构变化的 DOM | 保持不动；只有唯一且经过审核的指纹才会匹配。 |
+| 未知或结构变化的 DOM | 保持不动；只有唯一且经过审核的兼容记录才会匹配。 |
 
 DSH 0.1.x 尚未提供公共图标解析接口，因此当前兼容层刻意保持范围小、可逆、遇到歧义就停。完整契约和上游建议见[设计文档](docs/design.md)。
 
 ## 外部插件兼容验证
 
-测试固定抽取了真实开源项目的注册信息，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。
+测试固定抽取了真实开源项目的注册源码片段，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。
 
 ## 开发与发布门槛
 

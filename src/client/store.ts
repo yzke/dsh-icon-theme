@@ -19,7 +19,8 @@ export interface SettingsScopeLike {
 }
 
 export interface SlotLedgerLike {
-  entries: (name: string) => readonly SlotEntryLike[]
+  /** Render winners after DSH priority shadowing, not the raw registration ledger. */
+  entriesOfSlot: (name: string) => readonly SlotEntryLike[]
   subscribe: (name: string, listener: () => void) => () => void
 }
 
@@ -158,8 +159,8 @@ export class IconThemeStore {
     const scope = this.scope.getSnapshot()
     let settings: DetectedTarget[] = []
     let sidebar: DetectedTarget[] = []
-    try { settings = discoverSettings(this.slots.entries('settings.section')) } catch {}
-    try { sidebar = discoverSidebar(this.slots.entries('sidebar.footer.action')) } catch {}
+    try { settings = discoverSettings(this.slots.entriesOfSlot('settings.section')) } catch {}
+    try { sidebar = discoverSidebar(this.slots.entriesOfSlot('sidebar.footer.action')) } catch {}
     return {
       config: this.config,
       targets: [...settings, ...sidebar],

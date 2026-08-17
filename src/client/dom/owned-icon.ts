@@ -7,6 +7,19 @@ let nextToken = 1
 export const MANAGED_ATTR = 'data-dsh-icon-theme-managed'
 export const GLYPH_ATTR = 'data-dsh-icon-theme-glyph'
 
+export function ownedIconMatches(element: HTMLElement, target: DetectedTarget, iconId: string): boolean {
+  const icon = ICON_BY_ID.get(iconId)
+  if (!icon
+    || !element.hasAttribute(MANAGED_ATTR)
+    || element.dataset.dshIconThemeSurface !== target.surface
+    || element.dataset.dshIconThemeId !== target.id
+    || element.dataset.dshIconThemeIcon !== iconId) return false
+  const glyphs = Array.from(element.children)
+    .filter(child => child instanceof HTMLElement && child.hasAttribute(GLYPH_ATTR)) as HTMLElement[]
+  return glyphs.length === 1
+    && glyphs[0]!.style.getPropertyValue('--dsh-icon-theme-mask') === iconMaskUrl(icon)
+}
+
 export function clearOwnedIcon(element: HTMLElement): void {
   element.querySelectorAll<HTMLElement>(`:scope > [${GLYPH_ATTR}]`).forEach(node => node.remove())
   element.removeAttribute(MANAGED_ATTR)

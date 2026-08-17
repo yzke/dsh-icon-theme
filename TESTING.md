@@ -15,7 +15,10 @@ npm pack --dry-run
 2. **Resolution** — table-driven tests lock manual, plugin, original, preset,
    inference, and fallback priority. Localized labels are explicitly excluded.
 3. **DOM contracts** — jsdom covers delayed mount, host rerender, ledger/DOM
-   mismatch, iconless rows, multi-root contributions, and complete disposal.
+   mismatch, look-alike/ambiguous dialogs, in-place child and compatibility
+   attribute replacement, iconless rows, multi-root contributions, and complete
+   disposal. It also proves unrelated streaming DOM mutations do not rescan the
+   sidebar.
 4. **Store and UI** — stable-key writes, user-layer clearing, both surfaces,
    icon picking, live source changes, filtering, and reset behavior.
 5. **Lifecycle and build** — fake DSH context verifies registrations,
@@ -24,11 +27,13 @@ npm pack --dry-run
    same-origin non-simple header, top-level path allowlist, revision forwarding,
    unavailable state, and DSH Settings persistence.
 7. **Ecosystem fixtures** — registrations pinned from five open-source plugins
-   prove generic discovery of an unknown Settings section, safe gear fallback,
-   manual override, and non-interference with unrelated slot surfaces.
-8. **Browser fixture** — real Chromium executes the produced
-   `window.__ModuleLoader__` artifact against representative Settings/sidebar
-   DOM, confirms non-empty mask pixels, and restores original SVGs.
+   include immutable source blob IDs and prove generic discovery of an unknown
+   Settings section, safe gear fallback, manual override, and non-interference
+   with unrelated slot surfaces.
+8. **Browser fixture** — real Chromium and React execute the produced
+   `window.__ModuleLoader__` artifact, mount the complete settings component,
+   open its 51-item picker, persist a manual choice through the browser wire,
+   confirm non-empty mask pixels, and restore original SVGs on disposal.
 9. **Real DSH smoke** — after local installation, run:
 
    ```bash
@@ -37,8 +42,8 @@ npm pack --dry-run
 
    The test opens Settings → Icons, verifies live discovery and friendly sidebar
    names, changes the rendered Import Conversations icon, changes the Market
-   icon, verifies both real DOM updates, and restores automatic selection before
-   exiting.
+   icon, verifies both real DOM updates, reloads the whole page to prove Host
+   Settings persistence, and restores automatic selection before exiting.
 
 ## Regression requirements
 

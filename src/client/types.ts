@@ -12,11 +12,20 @@ export interface DetectedTarget {
 }
 
 export type ResolutionSource = 'manual' | 'plugin' | 'preset' | 'inferred' | 'original' | 'fallback'
+export type ResolutionReason =
+  | 'reasonManual'
+  | 'reasonPlugin'
+  | 'reasonOriginal'
+  | 'reasonPreset'
+  | 'reasonInferred'
+  | 'reasonHostFallback'
+  | 'reasonExisting'
+  | 'reasonSafeFallback'
 
 export interface Resolution {
   iconId: string | null
   source: ResolutionSource
-  reason: string
+  reason: ResolutionReason
 }
 
 export interface IconEvidence {

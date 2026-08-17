@@ -6,6 +6,7 @@ import type { DetectedTarget, ResolutionSource, TargetKey } from './types.ts'
 import { IconGlyph } from './icon-ui.tsx'
 import { IconPicker } from './IconPicker.tsx'
 import type { AdapterReport, TargetAdapterStatus } from './dom/adapter-types.ts'
+import { SIDEBAR_COMPATIBILITY } from './sidebar-compat.ts'
 
 type Filter = 'all' | 'settings' | 'sidebar' | 'unrecognized' | 'customized'
 
@@ -23,21 +24,13 @@ function previewIcon(target: DetectedTarget, iconId: string | null): string {
   return iconId ?? EXACT_PRESETS[target.key] ?? 'settings'
 }
 
-const SIDEBAR_LABEL_KEYS = {
-  'chat-import': 'sidebarChatImport',
-  'cordis-panel': 'sidebarCordisPanel',
-  'cost-meter': 'sidebarCostMeter',
-  bookmarks: 'sidebarBookmarks',
-  'usage-stats': 'sidebarUsageStats',
-} as const
-
 function displayLabel(target: DetectedTarget, report: AdapterReport | undefined, t: Translate): string {
   const observed = report?.labels?.[target.key]
   if (observed) return observed
   if (target.label) return target.label
   if (target.surface === 'sidebar.footer.action') {
-    const key = SIDEBAR_LABEL_KEYS[target.id as keyof typeof SIDEBAR_LABEL_KEYS]
-    if (key) return t(key)
+    const record = SIDEBAR_COMPATIBILITY[target.id]
+    if (record) return t(record.labelKey)
   }
   return target.id.replace(/[-_]+/g, ' ')
 }
@@ -116,7 +109,7 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
                 <div className="dit-label">{label}</div>
                 <div className="dit-id">{target.key}</div>
               </div>
-              <div className="dit-source" title={resolution.reason}>{statusLabel(targetStatus, resolution.source, t)}</div>
+              <div className="dit-source" title={t(resolution.reason)}>{statusLabel(targetStatus, resolution.source, t)}</div>
               <div className="dit-actions">
                 {customized && <button type="button" className="dit-icon-button" disabled={!snapshot.writable} onClick={() => void store.resetTarget(target.key)}>{t('reset')}</button>}
                 <button type="button" className="dit-icon-button" disabled={!snapshot.writable || nonIcon} onClick={() => setPicker(target.key)}>{t('choose')}</button>

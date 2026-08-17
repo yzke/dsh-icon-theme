@@ -16,7 +16,7 @@ function fakeScope(value: unknown = {}): SettingsScopeLike & { writes: unknown[]
 
 function fakeSlots(): SlotLedgerLike {
   return {
-    entries: name => name === 'settings.section'
+    entriesOfSlot: name => name === 'settings.section'
       ? [{ options: { id: 'market', order: 40, label: 'Market' } }]
       : [{ options: { id: 'bookmarks', order: 20, label: 'Bookmarks' } }],
     subscribe: () => () => {},
@@ -47,6 +47,23 @@ describe('IconThemeStore', () => {
       'settings.section:market',
       'sidebar.footer.action:bookmarks',
     ])
+    store.dispose()
+  })
+
+  it('discovers rendered winners rather than shadowed raw registrations', () => {
+    const slots: SlotLedgerLike & { entries: (name: string) => readonly { options: { id: string; priority: number } }[] } = {
+      entries: () => [
+        { options: { id: 'market', priority: 0 } },
+        { options: { id: 'market', priority: 10 } },
+      ],
+      entriesOfSlot: name => name === 'settings.section'
+        ? [{ options: { id: 'market', order: 40, label: 'Market winner' } }]
+        : [],
+      subscribe: () => () => {},
+    }
+    const store = createIconThemeStore(fakeScope(), slots)
+    expect(store.getSnapshot().targets).toHaveLength(1)
+    expect(store.getSnapshot().targets[0]).toMatchObject({ id: 'market', label: 'Market winner' })
     store.dispose()
   })
 })

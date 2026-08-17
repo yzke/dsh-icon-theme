@@ -29,7 +29,7 @@ describe('client lifecycle', () => {
     }
     const slotListeners = new Map<string, Set<() => void>>()
     const slots = {
-      entries: (name: string) => name === 'settings.section' ? settingsEntries : sidebarEntries,
+      entriesOfSlot: (name: string) => name === 'settings.section' ? settingsEntries : sidebarEntries,
       subscribe: (name: string, listener: () => void) => {
         const set = slotListeners.get(name) ?? new Set()
         set.add(listener)
@@ -73,6 +73,11 @@ describe('client lifecycle', () => {
 
     const dialog = document.createElement('div')
     dialog.setAttribute('role', 'dialog')
+    dialog.setAttribute('aria-labelledby', 'settings-title')
+    const title = document.createElement('div')
+    title.id = 'settings-title'
+    title.innerHTML = '<div data-slot="settings.header">Settings</div>'
+    dialog.appendChild(title)
     const nav = document.createElement('nav')
     for (const id of ['general', 'market', 'icon-theme']) {
       const button = document.createElement('button')

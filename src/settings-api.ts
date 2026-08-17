@@ -81,11 +81,27 @@ function view(settings: SettingsProvider): { value: unknown; revision: number; w
   return { value: descriptor.value, revision: descriptor.revision, writable: settings.writable }
 }
 
+function hasTrustedOrigin(req: IncomingMessage): boolean {
+  const rawOrigin = req.headers.origin
+  if (rawOrigin === undefined) return true
+  const host = req.headers.host
+  if (host === undefined) return false
+  try {
+    const origin = new URL(String(rawOrigin))
+    const protocol = (req.socket as { encrypted?: boolean } | undefined)?.encrypted === true ? 'https:' : 'http:'
+    return origin.protocol === protocol && origin.host === host
+  } catch {
+    return false
+  }
+}
+
 /** A fixed-namespace, same-origin settings seam for non-provider UI plugins. */
 export function createSettingsHandler(settings: SettingsProvider) {
   return async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
     const fetchSite = String(req.headers['sec-fetch-site'] ?? '')
-    if (req.headers[SETTINGS_API_HEADER] !== '1' || (fetchSite !== '' && fetchSite !== 'same-origin' && fetchSite !== 'none')) {
+    if (req.headers[SETTINGS_API_HEADER] !== '1'
+      || (fetchSite !== '' && fetchSite !== 'same-origin' && fetchSite !== 'none')
+      || !hasTrustedOrigin(req)) {
       writeJson(res, 403, { ok: false, error: 'forbidden' })
       return
     }

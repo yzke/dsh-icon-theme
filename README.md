@@ -6,11 +6,13 @@ Automatic, coherent, and user-customizable icons for DeepSeek Harness Settings a
 
 ![Settings overview](docs/images/settings-overview.png)
 
+_Screenshots use the Chinese locale; the plugin ships equivalent English labels._
+
 ## Why this plugin
 
 DSH 0.1.x settings contributions expose stable IDs and labels, but not an icon field. As a result, many third-party pages fall back to the same gear. `dsh-icon-theme` discovers the live slot ledger, preserves trustworthy original icons, fills recognizable gaps with a small Fluent-style pack, and lets the user override every supported target.
 
-- Discovers live `settings.section` and `sidebar.footer.action` contributions; no install-specific list is baked in.
+- Discovers live winning `settings.section` and `sidebar.footer.action` contributions generically. Audited per-plugin records are used only when a sidebar is partially rendered and cannot be correlated by order.
 - Stores choices by stable key, such as `settings.section:market`, never by translated labels or DOM position.
 - Ships 50 curated Fluent UI 16 Regular glyphs plus the audited monochrome dsh-market glyph.
 - Uses no icon CDN, webfont, Iconify API, GitHub request, or package scanning at runtime.
@@ -64,13 +66,13 @@ Localized labels are display and search text only. They never decide a persisted
 | Rendered icon action | Changeable; the original is preserved by default. |
 | Registered but not rendered | Listed as “can preset”; the override applies when it appears. |
 | Non-icon card | Reported but deliberately left unchanged. |
-| Unknown or changed DOM | Left untouched unless a unique audited fingerprint exists. |
+| Unknown or changed DOM | Left untouched unless a unique audited compatibility record exists. |
 
 The compatibility layer is intentionally narrow and reversible because DSH 0.1.x does not yet expose a public icon resolver. See [the design note](docs/design.md) for the contract and upstream direction.
 
 ## Ecosystem checks
 
-Compatibility fixtures are pinned to real open-source registrations, including `dsh-full-remote`, `dsh-context`, `dsh-openpencil`, `dsh-approve-for-me`, and `dsh-composer-polish`. They prove that an unknown Settings section is discovered generically, while contributions to unrelated surfaces are not misidentified. Details and pinned commits are in [ecosystem compatibility](docs/ecosystem-compatibility.md).
+Compatibility fixtures are pinned to real open-source registration excerpts, including `dsh-full-remote`, `dsh-context`, `dsh-openpencil`, `dsh-approve-for-me`, and `dsh-composer-polish`. They prove that an unknown Settings section is discovered generically, while contributions to unrelated surfaces are not misidentified. Details and pinned commits are in [ecosystem compatibility](docs/ecosystem-compatibility.md).
 
 ## Development and release gate
 

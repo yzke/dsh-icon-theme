@@ -42,15 +42,19 @@ describe('built client compatibility fixture', () => {
   it('detects both surfaces and restores original SVGs on plugin disposal', async () => {
     const page = await browser.newPage()
     await page.setContent(`
-      <div role="dialog">
+      <div role="dialog" aria-labelledby="settings-fixture-title">
         <nav>
+          <div id="settings-fixture-title"><div data-slot="settings.header">Settings</div></div>
           <button aria-current="true"><svg data-original="general"></svg><span>General</span></button>
           <button><svg data-original="market"></svg><span>Market</span></button>
           <button><svg data-original="icon-theme"></svg><span>Icons</span></button>
         </nav>
       </div>
       <div data-slot="sidebar.footer.action"><button aria-label="Bookmarks"><svg data-original="bookmarks"></svg></button></div>
+      <div id="plugin-ui"></div>
     `)
+    await page.addScriptTag({ path: new URL('../../node_modules/react/umd/react.development.js', import.meta.url).pathname })
+    await page.addScriptTag({ path: new URL('../../node_modules/react-dom/umd/react-dom.development.js', import.meta.url).pathname })
     await page.evaluate(() => {
       const settingsEntries: Array<{ options: Record<string, unknown> }> = [
         { options: { id: 'general', order: 0, label: 'General' } },
@@ -60,14 +64,33 @@ describe('built client compatibility fixture', () => {
       const slotListeners = new Map<string, Set<() => void>>()
       const effects: Array<() => void> = []
       const injected: Array<() => void> = []
-      window.fetch = async () => new Response(JSON.stringify({
-        ok: true,
-        revision: 0,
-        writable: true,
-        value: { overrides: { 'sidebar.footer.action:bookmarks': 'apps' } },
-      }), { status: 200, headers: { 'content-type': 'application/json' } })
+      let revision = 0
+      const settingsValue: Record<string, unknown> = { overrides: { 'sidebar.footer.action:bookmarks': 'apps' } }
+      window.fetch = async (_input, init) => {
+        const payload = JSON.parse(String(init?.body ?? '{}')) as {
+          action?: string
+          ops?: Array<{ op: 'set' | 'unset'; path: string[]; value?: unknown }>
+        }
+        if (payload.action === 'mutate') {
+          for (const operation of payload.ops ?? []) {
+            const field = operation.path[0]
+            if (!field) continue
+            if (operation.op === 'set') settingsValue[field] = operation.value
+            else delete settingsValue[field]
+          }
+          revision += 1
+        }
+        return new Response(JSON.stringify({ ok: true, revision, writable: true, value: settingsValue }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      }
+      const runtime = window as unknown as {
+        React: { createElement: (component: unknown, props?: unknown) => unknown; Fragment: unknown }
+        ReactDOM: { createRoot: (element: Element) => { render: (node: unknown) => void; unmount: () => void } }
+      }
       const slots = {
-        entries: (name: string) => name === 'settings.section' ? settingsEntries : sidebarEntries,
+        entriesOfSlot: (name: string) => name === 'settings.section' ? settingsEntries : sidebarEntries,
         subscribe: (name: string, listener: () => void) => {
           const set = slotListeners.get(name) ?? new Set()
           set.add(listener)
@@ -78,12 +101,16 @@ describe('built client compatibility fixture', () => {
           const dispose = register()
           if (typeof dispose === 'function') injected.push(dispose as () => void)
         },
-        register: (options: Record<string, unknown>) => {
+        register: (options: Record<string, unknown>, component: (props: unknown) => unknown) => {
           if (options.name === 'settings.section') {
             const entry = { options }
             settingsEntries.push(entry)
             slotListeners.get('settings.section')?.forEach(listener => listener())
+            const mount = document.querySelector('#plugin-ui')!
+            const root = runtime.ReactDOM.createRoot(mount)
+            root.render(runtime.React.createElement(component))
             return () => {
+              root.unmount()
               const index = settingsEntries.indexOf(entry)
               if (index >= 0) settingsEntries.splice(index, 1)
             }
@@ -106,8 +133,11 @@ describe('built client compatibility fixture', () => {
       ;(window as unknown as Record<string, unknown>).__ModuleLoader__ = {
         load: ({ factory }: { factory: (require: (id: string) => unknown) => { apply: (ctx: unknown) => void } }) => {
           const plugin = factory((id: string) => {
-            if (id === 'react') return { createElement: () => null, useMemo: () => null, useState: () => [null, () => {}], useSyncExternalStore: () => null }
-            if (id === 'react/jsx-runtime') return { jsx: () => null, jsxs: () => null, Fragment: Symbol('Fragment') }
+            if (id === 'react') return runtime.React
+            if (id === 'react/jsx-runtime') {
+              const jsx = (component: unknown, props: Record<string, unknown>, key?: string) => runtime.React.createElement(component, key === undefined ? props : { ...props, key })
+              return { jsx, jsxs: jsx, Fragment: runtime.React.Fragment }
+            }
             throw new Error(`unexpected external: ${id}`)
           })
           plugin.apply(ctx)
@@ -119,6 +149,11 @@ describe('built client compatibility fixture', () => {
       }
     })
     await page.addScriptTag({ path: new URL('../../client/client.js', import.meta.url).pathname })
+    await page.waitForSelector('[data-target-key="settings.section:market"]')
+    await page.locator('[data-target-key="settings.section:market"] .dit-icon-button').click()
+    await expect.poll(async () => page.locator('.dit-grid-item').count()).toBe(51)
+    await page.getByTitle(/ · apps$/).click()
+    await expect.poll(async () => page.locator('[data-target-key="settings.section:market"] .dit-source').textContent()).toMatch(/manual/)
     await page.waitForSelector('[data-dsh-icon-theme-id="market"]')
     await page.waitForSelector('[data-dsh-icon-theme-id="bookmarks"]')
     const state = await page.evaluate(() => ({
@@ -160,11 +195,23 @@ describe.skipIf(!process.env.DSH_E2E_URL)('real DSH smoke @real-dsh', () => {
     await chatImport.getByRole('button', { name: /恢复自动|Use automatic/ }).click()
     await expect.poll(async () => page.locator('[data-slot="sidebar.footer.action"] [aria-label="导入会话"]').getAttribute('data-dsh-icon-theme-managed')).toBeNull()
     await dialog.getByRole('button', { name: /^(全部|All)$/ }).click()
-    const market = dialog.locator('[data-target-key="settings.section:market"]')
+    let market = dialog.locator('[data-target-key="settings.section:market"]')
     await market.getByRole('button', { name: /^(更改|Change)$/ }).click()
+    const saved = page.waitForResponse(response => response.url().endsWith('/_dsh/icon-theme/settings') && response.request().method() === 'POST')
     await page.locator('.dit-picker').getByRole('button', { name: /^(插件|Apps)$/ }).click()
+    await saved
     await expect.poll(async () => market.textContent()).toMatch(/手动|Manual/)
+
+    // The Host Settings provider, not page memory, owns the choice.
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await page.getByRole('button', { name: /(设置|Settings)/ }).click()
+    const reopened = page.getByRole('dialog')
+    await reopened.getByRole('button', { name: /^(图标|Icons)$/ }).click()
+    market = reopened.locator('[data-target-key="settings.section:market"]')
+    await expect.poll(async () => market.textContent()).toMatch(/手动|Manual/)
+    const reset = page.waitForResponse(response => response.url().endsWith('/_dsh/icon-theme/settings') && response.request().method() === 'POST')
     await market.getByRole('button', { name: /恢复自动|Use automatic/ }).click()
+    await reset
     await expect.poll(async () => market.textContent()).not.toMatch(/手动|Manual/)
     await page.close()
   })

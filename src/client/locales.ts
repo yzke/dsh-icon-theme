@@ -1,4 +1,5 @@
 export const zh = {
+  localeCode: 'zh',
   nav: '图标',
   title: '图标',
   subtitle: '自动识别当前设置与侧边栏功能，也可以逐项手动更改。',
@@ -37,9 +38,18 @@ export const zh = {
   sidebarCostMeter: '余额与费用',
   sidebarBookmarks: '收藏中心 / 归档',
   sidebarUsageStats: '使用统计',
+  reasonManual: '用户手动选择',
+  reasonPlugin: '已审核的插件自带图标',
+  reasonOriginal: '保留插件或 DSH 的原生图标',
+  reasonPreset: '稳定 ID 预设',
+  reasonInferred: '由稳定 ID 的唯一语义推断',
+  reasonHostFallback: '没有可信匹配，保留宿主回退图标',
+  reasonExisting: '保留现有图标',
+  reasonSafeFallback: '目标没有原图标，使用安全回退',
 }
 
 export const en: Record<keyof typeof zh, string> = {
+  localeCode: 'en',
   nav: 'Icons',
   title: 'Icons',
   subtitle: 'Detect current Settings and sidebar features automatically, with per-item overrides.',
@@ -78,6 +88,14 @@ export const en: Record<keyof typeof zh, string> = {
   sidebarCostMeter: 'Balance and cost',
   sidebarBookmarks: 'Bookmarks / archive',
   sidebarUsageStats: 'Usage statistics',
+  reasonManual: 'Selected manually',
+  reasonPlugin: 'Audited bundled plugin icon',
+  reasonOriginal: 'Keep the native DSH or plugin icon',
+  reasonPreset: 'Exact stable-ID preset',
+  reasonInferred: 'Unique semantic match from the stable ID',
+  reasonHostFallback: 'No trustworthy match; keep the host fallback',
+  reasonExisting: 'Keep the existing icon',
+  reasonSafeFallback: 'No original icon; use the safe fallback',
 }
 
 export type Translate = (key: keyof typeof zh) => string

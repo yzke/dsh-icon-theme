@@ -2,7 +2,7 @@
 import { afterEach, describe, expect, it } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { IconThemeSection } from '../src/client/IconThemeSection.tsx'
-import { zh, type Translate } from '../src/client/locales.ts'
+import { en, zh, type Translate } from '../src/client/locales.ts'
 import { createIconThemeStore, type SettingsScopeLike, type SlotLedgerLike } from '../src/client/store.ts'
 
 afterEach(cleanup)
@@ -28,7 +28,7 @@ function harness(sidebarEntries: Array<{ options: { id: string; order?: number; 
     },
   }
   const slots: SlotLedgerLike = {
-    entries: name => name === 'settings.section'
+    entriesOfSlot: name => name === 'settings.section'
       ? [
           { options: { id: 'market', order: 40, label: '插件市场' } },
           { options: { id: 'unknown-feature', order: 50, label: '神秘功能' } },
@@ -40,6 +40,7 @@ function harness(sidebarEntries: Array<{ options: { id: string; order?: number; 
 }
 
 const t: Translate = key => zh[key]
+const tEn: Translate = key => en[key]
 
 describe('IconThemeSection', () => {
   it('selects and resets a manual override with a live source update', async () => {
@@ -102,6 +103,17 @@ describe('IconThemeSection', () => {
     expect(screen.getByText('当前未渲染 · 可预设')).toBeTruthy()
     const costRow = screen.getByText('余额与费用').closest('[data-target-key]') as HTMLElement
     expect(within(costRow).getByRole('button', { name: '更改' }).hasAttribute('disabled')).toBe(true)
+    store.dispose()
+  })
+
+  it('renders English icon labels and resolution reasons in the English locale', () => {
+    const { store } = harness()
+    render(<IconThemeSection store={store} t={tEn} />)
+    const row = screen.getByText('插件市场').closest('[data-target-key]') as HTMLElement
+    expect(row.querySelector('.dit-source')?.getAttribute('title')).toBe('Audited bundled plugin icon')
+    fireEvent.click(within(row).getByRole('button', { name: 'Change' }))
+    expect(screen.getByRole('button', { name: 'Apps' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: '插件' })).toBeNull()
     store.dispose()
   })
 })

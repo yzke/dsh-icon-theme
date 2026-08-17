@@ -7,9 +7,18 @@ function target(id: string, order: number): DetectedTarget {
   return { surface: 'settings.section', id, key: `settings.section:${id}`, order, label: id }
 }
 
-function settingsDialog(ids: string[]): HTMLElement {
+let nextDialog = 1
+
+function settingsDialog(ids: string[], auditedIdentity = true): HTMLElement {
   const dialog = document.createElement('div')
   dialog.setAttribute('role', 'dialog')
+  if (auditedIdentity) {
+    const title = document.createElement('div')
+    title.id = `settings-title-${nextDialog++}`
+    title.innerHTML = '<div data-slot="settings.header">Settings</div>'
+    dialog.setAttribute('aria-labelledby', title.id)
+    dialog.appendChild(title)
+  }
   const nav = document.createElement('nav')
   ids.forEach((id, index) => {
     const button = document.createElement('button')
@@ -31,8 +40,8 @@ describe('mountSettingsAdapter', () => {
   it('supports delayed dialog mount and restores original SVGs on disposal', async () => {
     const targets = [target('general', 0), target('market', 40)]
     const resolve = (value: DetectedTarget): Resolution => value.id === 'market'
-      ? { iconId: 'plugin.market', source: 'plugin', reason: 'test' }
-      : { iconId: null, source: 'original', reason: 'test' }
+      ? { iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }
+      : { iconId: null, source: 'original', reason: 'reasonOriginal' }
     const dispose = mountSettingsAdapter({ getTargets: () => targets, resolve })
     document.body.append(settingsDialog(['general', 'market']))
     await tick()
@@ -51,7 +60,7 @@ describe('mountSettingsAdapter', () => {
     const reports: unknown[] = []
     const dispose = mountSettingsAdapter({
       getTargets: () => [target('general', 0), target('market', 40)],
-      resolve: () => ({ iconId: 'settings', source: 'preset', reason: 'test' }),
+      resolve: () => ({ iconId: 'settings', source: 'preset', reason: 'reasonPreset' }),
       onReport: (_surface, report) => reports.push(report),
     })
     expect(document.querySelector('[data-dsh-icon-theme-managed]')).toBeNull()
@@ -64,13 +73,75 @@ describe('mountSettingsAdapter', () => {
     document.body.append(settingsDialog(['market']))
     const dispose = mountSettingsAdapter({
       getTargets: () => targets,
-      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'test' }),
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
     })
     const first = document.querySelector('nav button')!
     expect(first.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
     document.body.replaceChildren(settingsDialog(['market']))
     await tick()
     expect(document.querySelector('nav button')?.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+    dispose()
+  })
+
+  it('rebuilds its glyph when the host replaces children on the same button', async () => {
+    const targets = [target('market', 0)]
+    document.body.append(settingsDialog(['market']))
+    const dispose = mountSettingsAdapter({
+      getTargets: () => targets,
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
+    })
+    const button = document.querySelector('nav button')!
+    button.innerHTML = '<svg data-original="replacement"></svg><span>market</span>'
+    await tick()
+    expect(button.querySelector(':scope > [data-dsh-icon-theme-glyph]')).not.toBeNull()
+    expect(button.querySelector(':scope > svg[data-original="replacement"]')).not.toBeNull()
+    dispose()
+  })
+
+  it('clears managed state after the labelled title ID changes in place', async () => {
+    document.body.append(settingsDialog(['market']))
+    const dispose = mountSettingsAdapter({
+      getTargets: () => [target('market', 0)],
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
+    })
+    const button = document.querySelector('nav button')!
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+    document.querySelector('[data-slot="settings.header"]')!.parentElement!.id = 'changed-title-id'
+    await tick()
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(false)
+    dispose()
+  })
+
+  it('repairs a removed managed marker on the next identity mutation', async () => {
+    document.body.append(settingsDialog(['market']))
+    const dispose = mountSettingsAdapter({
+      getTargets: () => [target('market', 0)],
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
+    })
+    const button = document.querySelector('nav button')!
+    button.removeAttribute('data-dsh-icon-theme-managed')
+    await tick()
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+    expect(button.querySelectorAll(':scope > [data-dsh-icon-theme-glyph]')).toHaveLength(1)
+    dispose()
+  })
+
+  it('ignores a shape-similar unrelated dialog and ambiguous duplicate settings dialogs', () => {
+    const targets = [target('market', 0)]
+    document.body.append(settingsDialog(['market'], false))
+    let dispose = mountSettingsAdapter({
+      getTargets: () => targets,
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
+    })
+    expect(document.querySelector('[data-dsh-icon-theme-managed]')).toBeNull()
+    dispose()
+
+    document.body.replaceChildren(settingsDialog(['market']), settingsDialog(['market']))
+    dispose = mountSettingsAdapter({
+      getTargets: () => targets,
+      resolve: () => ({ iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }),
+    })
+    expect(document.querySelector('[data-dsh-icon-theme-managed]')).toBeNull()
     dispose()
   })
 })
