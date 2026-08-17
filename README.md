@@ -22,7 +22,13 @@ DSH 0.1.x settings contributions expose stable IDs and labels, but not an icon f
 
 ## Install
 
-The npm package has not been published yet. Install the current source release with:
+```bash
+dsh plugin --profile web add dsh-icon-theme
+```
+
+Restart `dsh web`, then open **Settings → Icons**.
+
+To install from a source checkout instead:
 
 ```bash
 git clone https://github.com/yzke/dsh-icon-theme.git
@@ -30,14 +36,6 @@ cd dsh-icon-theme
 npm ci
 npm run build
 dsh plugin --profile web add link:"$PWD"
-```
-
-Restart `dsh web`, then open **Settings → Icons**.
-
-After the first npm release, installation will be:
-
-```bash
-dsh plugin --profile web add dsh-icon-theme
 ```
 
 Supported DSH range: `>=0.1.0-rc.6 <0.2.0`. Node.js 22 or newer is required for source builds.

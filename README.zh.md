@@ -20,7 +20,13 @@ DSH 0.1.x 的设置贡献提供稳定 ID 和名称，但尚未提供图标字段
 
 ## 安装
 
-npm 包目前尚未发布。当前版本可以从源码安装：
+```bash
+dsh plugin --profile web add dsh-icon-theme
+```
+
+重启 `dsh web`，打开“设置 → 图标”。
+
+从源码安装：
 
 ```bash
 git clone https://github.com/yzke/dsh-icon-theme.git
@@ -28,14 +34,6 @@ cd dsh-icon-theme
 npm ci
 npm run build
 dsh plugin --profile web add link:"$PWD"
-```
-
-重启 `dsh web`，打开“设置 → 图标”。
-
-首次发布到 npm 后，安装命令会简化为：
-
-```bash
-dsh plugin --profile web add dsh-icon-theme
 ```
 
 兼容范围：DSH `>=0.1.0-rc.6 <0.2.0`。从源码构建需要 Node.js 22 或更高版本。
