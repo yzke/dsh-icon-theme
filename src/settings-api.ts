@@ -68,10 +68,10 @@ function validateRequest(value: unknown): SettingsRequest {
       ? { op: 'set', path: [candidate.path[0]], value: candidate.value }
       : { op: 'unset', path: [candidate.path[0]] }
   })
-  if (value.expectedRevision !== undefined && (!Number.isInteger(value.expectedRevision) || Number(value.expectedRevision) < 0)) {
+  if (!Number.isInteger(value.expectedRevision) || Number(value.expectedRevision) < 0) {
     throw new Error('invalid revision')
   }
-  return { action: 'mutate', ops, expectedRevision: value.expectedRevision as number | undefined }
+  return { action: 'mutate', ops, expectedRevision: value.expectedRevision as number }
 }
 
 function view(settings: SettingsProvider): { value: unknown; revision: number; writable: boolean } {

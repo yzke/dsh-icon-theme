@@ -70,6 +70,17 @@ describe('host settings API', () => {
     expect(JSON.parse(res.state.body)).toMatchObject({ ok: true, revision: 3 })
   })
 
+  it('rejects a mutate without expectedRevision', async () => {
+    const provider = settings()
+    const res = response()
+    await createSettingsHandler(provider.value as never)(request({
+      action: 'mutate',
+      ops: [{ op: 'set', path: ['overrides'], value: {} }],
+    }) as never, res.value as never)
+    expect(res.state.status).toBe(400)
+    expect(provider.state.mutations).toEqual([])
+  })
+
   it('rejects arbitrary settings paths', async () => {
     const provider = settings()
     const res = response()
