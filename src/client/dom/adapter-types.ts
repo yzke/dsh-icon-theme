@@ -10,6 +10,7 @@ export interface AdapterReport {
   reason?: string
   targets?: Partial<Record<TargetKey, TargetAdapterStatus>>
   labels?: Partial<Record<TargetKey, string>>
+  resolutions?: Partial<Record<TargetKey, Resolution>>
 }
 
 export interface AdapterOptions {

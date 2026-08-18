@@ -126,6 +126,27 @@ describe('mountSettingsAdapter', () => {
     dispose()
   })
 
+  it('re-syncs when a trusted third-party icon marker appears or disappears', async () => {
+    document.body.append(settingsDialog(['better-sidebar']))
+    const button = document.querySelector('nav button') as HTMLButtonElement
+    const dispose = mountSettingsAdapter({
+      getTargets: () => [target('better-sidebar', 10)],
+      resolve: (_target, evidence) => evidence.originalIsGeneric
+        ? { iconId: 'panel_right_gallery', source: 'preset', reason: 'reasonPreset' }
+        : { iconId: null, source: 'original', reason: 'reasonOriginal' },
+    })
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+
+    button.setAttribute('data-dsh-better-sidebar-settings-nav', '')
+    await tick()
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(false)
+
+    button.removeAttribute('data-dsh-better-sidebar-settings-nav')
+    await tick()
+    expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+    dispose()
+  })
+
   it('ignores a shape-similar unrelated dialog and ambiguous duplicate settings dialogs', () => {
     const targets = [target('market', 0)]
     document.body.append(settingsDialog(['market'], false))

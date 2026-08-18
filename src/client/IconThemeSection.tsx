@@ -1,7 +1,7 @@
 import { useMemo, useState, useSyncExternalStore } from 'react'
-import type { IconThemeStore } from './store.ts'
+import type { IconThemeSnapshot, IconThemeStore } from './store.ts'
 import type { Translate } from './locales.ts'
-import type { DetectedTarget, ResolutionSource, TargetKey } from './types.ts'
+import type { DetectedTarget, Resolution, ResolutionSource, TargetKey } from './types.ts'
 import { IconGlyph } from './icon-ui.tsx'
 import { IconPicker } from './IconPicker.tsx'
 import type { AdapterReport, TargetAdapterStatus } from './dom/adapter-types.ts'
@@ -21,6 +21,10 @@ function sourceLabel(source: ResolutionSource, t: Translate): string {
 
 function previewIcon(iconId: string | null): string {
   return iconId ?? 'settings'
+}
+
+function effectiveResolution(target: DetectedTarget, snapshot: IconThemeSnapshot, store: IconThemeStore): Resolution {
+  return snapshot.reports[target.surface]?.resolutions?.[target.key] ?? store.resolve(target)
 }
 
 function displayLabel(target: DetectedTarget, report: AdapterReport | undefined, t: Translate): string {
@@ -50,7 +54,7 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return snapshot.targets.filter(target => {
-      const resolution = store.resolve(target)
+      const resolution = effectiveResolution(target, snapshot, store)
       const label = displayLabel(target, snapshot.reports[target.surface], t)
       if (filter === 'settings' && target.surface !== 'settings.section') return false
       if (filter === 'sidebar' && target.surface !== 'sidebar.footer.action') return false
@@ -95,7 +99,7 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
 
       <div className="dit-list">
         {rows.map(target => {
-          const resolution = store.resolve(target)
+          const resolution = effectiveResolution(target, snapshot, store)
           const customized = target.key in snapshot.config.overrides
           const report = snapshot.reports[target.surface]
           const targetStatus = report?.targets?.[target.key]
@@ -124,7 +128,7 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
 
       {pickerTarget && (
         <IconPicker
-          current={snapshot.config.overrides[pickerTarget.key] ?? store.resolve(pickerTarget).iconId}
+          current={snapshot.config.overrides[pickerTarget.key] ?? effectiveResolution(pickerTarget, snapshot, store).iconId}
           t={t}
           onClose={() => setPicker(null)}
           onChoose={iconId => {

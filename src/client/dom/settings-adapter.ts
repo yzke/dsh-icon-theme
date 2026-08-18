@@ -1,5 +1,5 @@
 import { NATIVE_SETTINGS_IDS } from '../presets.ts'
-import type { DetectedTarget } from '../types.ts'
+import type { DetectedTarget, Resolution } from '../types.ts'
 import type { AdapterOptions, AdapterReport } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
 import { applyOwnedIcon, clearOwnedIcon, ownedIconMatches } from './owned-icon.ts'
@@ -74,6 +74,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
     }
 
     const desired = new Set<HTMLElement>()
+    const targetResolutions: Partial<Record<DetectedTarget['key'], Resolution>> = {}
     let managed = 0
     for (let index = 0; index < match.targets.length; index += 1) {
       const target = match.targets[index]!
@@ -83,6 +84,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
         hasOriginal: true,
         originalIsGeneric: !NATIVE_SETTINGS_IDS.has(target.id) && !hasTrustedThirdPartyIcon,
       })
+      targetResolutions[target.key] = resolution
       if (resolution.iconId === null) {
         disposers.get(button)?.()
         disposers.delete(button)
@@ -106,6 +108,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
       available: targets.length,
       total: targets.length,
       targets: Object.fromEntries(targets.map(target => [target.key, 'changeable'] as const)),
+      resolutions: targetResolutions,
     })
   }
 
@@ -121,7 +124,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
     childList: true,
     subtree: true,
     attributes: true,
-    attributeFilter: ['role', 'id', 'aria-labelledby', 'aria-current', 'data-slot', 'data-dsh-icon-theme-managed'],
+    attributeFilter: ['role', 'id', 'aria-labelledby', 'aria-current', 'data-slot', 'data-dsh-icon-theme-managed', 'data-dsh-better-sidebar-settings-nav'],
   })
   const unsubscribe = options.subscribe?.(schedule) ?? (() => {})
 

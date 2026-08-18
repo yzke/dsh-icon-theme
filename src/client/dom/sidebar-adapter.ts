@@ -1,4 +1,4 @@
-import type { DetectedTarget } from '../types.ts'
+import type { DetectedTarget, Resolution } from '../types.ts'
 import { hasSidebarCompatibilityFingerprint, matchesSidebarCompatibility } from '../sidebar-compat.ts'
 import type { AdapterOptions, TargetAdapterStatus } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
@@ -96,6 +96,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
     let available = 0
     const targetStatuses: Partial<Record<DetectedTarget['key'], TargetAdapterStatus>> = {}
     const labels: Partial<Record<DetectedTarget['key'], string>> = {}
+    const targetResolutions: Partial<Record<DetectedTarget['key'], Resolution>> = {}
     for (const target of targets) {
       const root = matches.get(target)
       if (!root) {
@@ -112,6 +113,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
       const label = accessibleName(root)
       if (label && label.length <= 48) labels[target.key] = label
       const resolution = options.resolve(target, { hasOriginal: true, originalIsGeneric: false })
+      targetResolutions[target.key] = resolution
       if (resolution.iconId === null) {
         disposers.get(action)?.()
         disposers.delete(action)
@@ -138,6 +140,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
       reason: unmatched > 0 ? `${unmatched} 个已登记贡献当前未渲染或无法安全对应` : undefined,
       targets: targetStatuses,
       labels,
+      resolutions: targetResolutions,
     })
   }
 
