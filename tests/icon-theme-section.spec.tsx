@@ -90,8 +90,9 @@ describe('IconThemeSection', () => {
     store.dispose()
   })
 
-  it('filters to unresolved targets without using localized labels for inference', () => {
+  it('filters to unresolved targets without using localized labels for inference', async () => {
     const { store } = harness()
+    await store.setOriginalPolicy('replace-generic')
     render(<IconThemeSection store={store} t={t} />)
     fireEvent.click(screen.getByRole('button', { name: '未识别' }))
     expect(screen.getByText('神秘功能')).toBeTruthy()

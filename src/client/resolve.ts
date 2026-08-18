@@ -17,7 +17,7 @@ export function resolveIcon(
     return { iconId: plugin, source: 'plugin', reason: 'reasonPlugin' }
   }
 
-  if (config.originalPolicy === 'prefer' && evidence.hasOriginal && !evidence.originalIsGeneric) {
+  if (evidence.hasOriginal && (config.originalPolicy === 'prefer' || !evidence.originalIsGeneric)) {
     return { iconId: null, source: 'original', reason: 'reasonOriginal' }
   }
 
