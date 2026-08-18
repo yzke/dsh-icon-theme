@@ -20,6 +20,7 @@
     "build:host": "tsc -p tsconfig.json",
     "build:client": "npm run icons:generate && tsdown && node scripts/normalize-client-banner.mjs",
     "build": "npm run build:host && npm run build:client",
+    "prepare": "npm run build",
     "test": "vitest run",
     "test:web": "npm run build && vitest run --config vitest.web.config.ts",
     "preflight": "node scripts/preflight.mjs",
