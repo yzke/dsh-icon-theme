@@ -40,6 +40,14 @@ dsh plugin --profile web add link:"$PWD"
 
 Supported DSH range: `>=0.1.0-rc.6 <0.2.0`. Node.js 22 or newer is required for source builds.
 
+## Uninstall
+
+```bash
+dsh plugin --profile web remove dsh-icon-theme
+```
+
+Restart `dsh web`. The plugin restores every host SVG and removes all owned DOM markers and styles on unload.
+
 ## Use
 
 The page lists every discovered target, its stable key, its compatibility state, and the source of the current icon. Search by feature name, ID, or icon; filter Settings/sidebar/unrecognized/customized entries; choose a glyph; or restore one/all targets to automatic behavior.
@@ -72,7 +80,7 @@ When `dsh-better-sidebar` is installed, its own Settings row icon is treated as 
 
 ## Ecosystem checks
 
-Compatibility fixtures are pinned to real open-source registration excerpts, including `dsh-full-remote`, `dsh-context`, `dsh-openpencil`, `dsh-approve-for-me`, and `dsh-composer-polish`. They prove that an unknown Settings section is discovered generically, while contributions to unrelated surfaces are not misidentified. Details and pinned commits are in [ecosystem compatibility](docs/ecosystem-compatibility.md).
+Compatibility fixtures are pinned to real open-source registration excerpts, including `dsh-full-remote`, `dsh-context`, `dsh-openpencil`, `dsh-approve-for-me`, and `dsh-composer-polish`. They prove that an unknown Settings section is discovered generically, while contributions to unrelated surfaces are not misidentified. Details and pinned commits are in [ecosystem compatibility](docs/ecosystem-compatibility.md). The sidebar fallback fingerprints are also pinned to upstream revisions and may need periodic updates if those plugins change their DOM.
 
 ## Development and release gate
 

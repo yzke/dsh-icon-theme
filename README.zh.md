@@ -38,6 +38,14 @@ dsh plugin --profile web add link:"$PWD"
 
 兼容范围：DSH `>=0.1.0-rc.6 <0.2.0`。从源码构建需要 Node.js 22 或更高版本。
 
+## 卸载
+
+```bash
+dsh plugin --profile web remove dsh-icon-theme
+```
+
+重启 `dsh web`。插件卸载时会恢复所有宿主 SVG，并移除自身添加的 DOM 标记和样式。
+
 ## 使用方式
 
 图标页会列出所有已发现目标、稳定键、兼容状态和当前图标来源。可以按功能名、ID 或图标搜索，也可以筛选设置、侧边栏、未识别和已自定义项目；支持逐项选择、逐项恢复自动和全部恢复自动。
@@ -70,7 +78,7 @@ DSH 0.1.x 尚未提供公共图标解析接口，因此当前兼容层刻意保�
 
 ## 外部插件兼容验证
 
-测试固定抽取了真实开源项目的注册源码片段，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。
+测试固定抽取了真实开源项目的注册源码片段，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。侧边栏回退指纹同样固定到上游提交，若这些插件后续调整 DOM，需要定期更新。
 
 ## 开发与发布门槛
 
