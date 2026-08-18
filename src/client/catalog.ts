@@ -1,3 +1,4 @@
+import { OFFICIAL_DSH_ICONS } from './generated/official-dsh-icons.ts'
 import { GENERATED_FLUENT_ICONS, type FluentIconName } from './generated/fluent-icons.ts'
 import type { IconCategory, IconDef } from './icon-spec.ts'
 
@@ -92,7 +93,7 @@ export const ICON_CATALOG: readonly IconDef[] = Object.freeze([
     source: 'dsh-market/dsh-market assets/logo-mono.svg',
     license: 'MIT',
   },
-  ...fluentCatalog,
+  ...fluentCatalog, ...OFFICIAL_DSH_ICONS,
 ])
 
 export const ICON_BY_ID: ReadonlyMap<string, IconDef> = new Map(ICON_CATALOG.map(icon => [icon.id, icon]))

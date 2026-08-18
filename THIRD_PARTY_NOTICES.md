@@ -17,3 +17,13 @@ icon package and any runtime network client are not shipped.
 The `plugin.market` glyph is adapted from the monochrome logo in
 [dsh-market/dsh-market](https://github.com/dsh-market/dsh-market), licensed
 under the MIT License. It is included as an audited exact-plugin adapter.
+
+## Official DeepSeek Harness primitives icons
+
+This contribution bundles the official icon set from
+[@deepseek-ai/dsh-client-ui-primitives](https://www.npmjs.com/package/@deepseek-ai/dsh-client-ui-primitives)
+(the "dsh.*" entries in the icon picker). Icons are extracted at build time
+and embedded as static SVG strings; no runtime dependency is required.
+
+Copyright (c) 2026 DeepSeek. Licensed under the MIT License (the full license
+text is reproduced in the PR description / this file).
