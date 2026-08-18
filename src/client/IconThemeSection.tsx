@@ -4,6 +4,7 @@ import type { Translate } from './locales.ts'
 import type { DetectedTarget, Resolution, ResolutionSource, TargetKey } from './types.ts'
 import { IconGlyph } from './icon-ui.tsx'
 import { IconPicker } from './IconPicker.tsx'
+import { ICON_CATALOG } from './catalog.ts'
 import type { AdapterReport, TargetAdapterStatus } from './dom/adapter-types.ts'
 import { SIDEBAR_COMPATIBILITY } from './sidebar-compat.ts'
 
@@ -78,7 +79,7 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
       </div>
 
       <div className="dit-summary">
-        <span className="dit-report">{t('pack')}</span>
+        <span className="dit-report">{t('pack')} · {ICON_CATALOG.length}</span>
         <span className="dit-report">{t('detected')} · {snapshot.targets.length}</span>
         {(['settings.section', 'sidebar.footer.action'] as const).map(surface => {
           const report = snapshot.reports[surface]
