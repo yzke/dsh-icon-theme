@@ -34,7 +34,6 @@
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-client-locale": ">=0.1.0-rc.6 <0.2.0",
     "@deepseek-ai/dsh-client-runtime": ">=0.1.0-rc.6 <0.2.0",
-    "@deepseek-ai/dsh-client-ui-settings": ">=0.1.0-rc.6 <0.2.0",
     "@deepseek-ai/dsh-client-ui-slots": ">=0.1.0-rc.6 <0.2.0",
     "@deepseek-ai/dsh-settings": ">=0.1.0-rc.6 <0.2.0",
     "react": "^18.3.1"
@@ -43,7 +42,6 @@
     "@deepseek-ai/cordis": { "optional": true },
     "@deepseek-ai/dsh-client-locale": { "optional": true },
     "@deepseek-ai/dsh-client-runtime": { "optional": true },
-    "@deepseek-ai/dsh-client-ui-settings": { "optional": true },
     "@deepseek-ai/dsh-client-ui-slots": { "optional": true },
     "@deepseek-ai/dsh-settings": { "optional": true },
     "react": { "optional": true }
@@ -52,7 +50,6 @@
     "@deepseek-ai/cordis": "^4.0.1",
     "@deepseek-ai/dsh-client-locale": "0.1.0-rc.6",
     "@deepseek-ai/dsh-client-runtime": "0.1.0-rc.6",
-    "@deepseek-ai/dsh-client-ui-settings": "0.1.0-rc.6",
     "@deepseek-ai/dsh-client-ui-slots": "0.1.0-rc.6",
     "@deepseek-ai/dsh-settings": "0.1.0-rc.6",
     "@fluentui/svg-icons": "1.1.337",
@@ -74,7 +71,6 @@
       "inject": [
         "@deepseek-ai/dsh-client-runtime",
         "@deepseek-ai/dsh-client-ui-slots",
-        "@deepseek-ai/dsh-client-ui-settings",
         "@deepseek-ai/dsh-client-locale"
       ],
       "platform": "web"
