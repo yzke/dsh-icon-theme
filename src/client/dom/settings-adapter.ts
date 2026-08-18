@@ -2,7 +2,7 @@ import { NATIVE_SETTINGS_IDS } from '../presets.ts'
 import type { DetectedTarget, Resolution } from '../types.ts'
 import type { AdapterOptions, AdapterReport } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
-import { applyOwnedIcon, clearOwnedIcon, ownedIconMatches } from './owned-icon.ts'
+import { applyOwnedIcon, ownedIconMatches } from './owned-icon.ts'
 
 interface SettingsMatch {
   buttons: HTMLButtonElement[]
@@ -134,9 +134,4 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
     unsubscribe()
     clearAll()
   }
-}
-
-export function clearSettingsMarkers(): void {
-  document.querySelectorAll<HTMLElement>('[data-dsh-icon-theme-surface="settings.section"]')
-    .forEach(clearOwnedIcon)
 }
