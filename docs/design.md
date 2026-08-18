@@ -133,7 +133,7 @@ DSH 0.1.0-rc.6 的通用 `settingsScope` Web 协议只暴露产品白名单和�
 因此不会用虚假的 provider 条目绕过边界，也不会修改用户安装的 DSH bundle。
 
 Host 端改为提供 `/_dsh/icon-theme/settings` 固定端点：只接受 POST、同源 Fetch Metadata
-以及非简单请求头，只能对 `pack`、`overrides`、`originalPolicy` 三个顶层路径执行
+以及非简单请求头，只能对 `overrides`、`originalPolicy` 两个顶层路径执行
 Settings mutate，并携带 revision 做冲突检测。它继续使用 DSH Settings provider 落盘，但
 无法枚举或修改其他命名空间。浏览器端首次读取失败时明确进入只读状态，不会静默写入
 localStorage 形成两个真相来源。

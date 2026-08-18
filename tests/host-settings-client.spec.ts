@@ -18,7 +18,7 @@ describe('HostSettingsScope', () => {
       revision += calls.length > 1 ? 1 : 0
       return jsonResponse({
         ok: true,
-        value: { pack: 'dsh-fluent', overrides: {}, originalPolicy: 'prefer' },
+        value: { overrides: {}, originalPolicy: 'prefer' },
         revision,
         writable: true,
       })

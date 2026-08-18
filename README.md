@@ -93,6 +93,6 @@ The full testing contract is documented in [TESTING.md](TESTING.md). Icon source
 
 ## Privacy and security
 
-Detection reads only DSH slot metadata and the two rendered UI surfaces. The plugin does not inspect user files or other plugins' bundles. Settings use a fixed-namespace, same-origin Host endpoint that accepts only `pack`, `overrides`, and `originalPolicy`; it cannot read or mutate another plugin's namespace.
+Detection reads only DSH slot metadata and the two rendered UI surfaces. The plugin does not inspect user files or other plugins' bundles. Settings use a fixed-namespace, same-origin Host endpoint that accepts only `overrides` and `originalPolicy`; it cannot read or mutate another plugin's namespace.
 
 MIT licensed.

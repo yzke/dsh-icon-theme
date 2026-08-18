@@ -27,7 +27,7 @@ function response() {
 function settings() {
   const state = {
     revision: 2,
-    value: { pack: 'dsh-fluent', overrides: {}, originalPolicy: 'prefer' },
+    value: { overrides: {}, originalPolicy: 'prefer' },
     mutations: [] as unknown[][],
   }
   return {

@@ -34,7 +34,6 @@ export interface IconThemeSnapshot {
 }
 
 const CLIENT_DEFAULT_CONFIG: IconThemeConfig = {
-  pack: 'dsh-fluent',
   overrides: {},
   originalPolicy: 'prefer',
 }
@@ -49,7 +48,6 @@ export function normalizeClientConfig(value: unknown): IconThemeConfig {
     ? Object.fromEntries(Object.entries(value.overrides).filter((entry): entry is [string, string] => typeof entry[1] === 'string'))
     : {}
   return {
-    pack: typeof value.pack === 'string' ? value.pack : CLIENT_DEFAULT_CONFIG.pack,
     overrides,
     originalPolicy: value.originalPolicy === 'replace-generic' ? 'replace-generic' : 'prefer',
   }

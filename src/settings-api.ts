@@ -6,7 +6,7 @@ import { Config, normalizeConfig, type IconThemeConfig } from './config.ts'
 export const SETTINGS_API_PATH = '/_dsh/icon-theme/settings'
 const SETTINGS_API_HEADER = 'x-dsh-icon-theme'
 const MAX_BODY_BYTES = 64 * 1024
-const MUTABLE_FIELDS = new Set(['pack', 'overrides', 'originalPolicy'])
+const MUTABLE_FIELDS = new Set(['overrides', 'originalPolicy'])
 
 interface WebServerLike {
   register(options: {

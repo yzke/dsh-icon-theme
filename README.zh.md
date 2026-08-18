@@ -91,6 +91,6 @@ DSH_E2E_URL=http://127.0.0.1:3080 npm run test:web -- -t @real-dsh
 
 ## 隐私与安全
 
-自动识别只读取 DSH 插槽元数据和两个受支持界面的当前 DOM，不读取用户文件，也不解析其他插件的编译产物。配置通过固定命名空间、同源限定的 Host 接口保存；接口只接受 `pack`、`overrides` 和 `originalPolicy`，不能读取或修改其他插件的配置。
+自动识别只读取 DSH 插槽元数据和两个受支持界面的当前 DOM，不读取用户文件，也不解析其他插件的编译产物。配置通过固定命名空间、同源限定的 Host 接口保存；接口只接受 `overrides` 和 `originalPolicy`，不能读取或修改其他插件的配置。
 
 MIT 许可证。
