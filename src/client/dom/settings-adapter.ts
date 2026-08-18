@@ -9,6 +9,9 @@ interface SettingsMatch {
   targets: readonly DetectedTarget[]
 }
 
+/** Third-party markers that indicate a settings row already has a custom icon. */
+const TRUSTED_THIRD_PARTY_SETTINGS_MARKERS = ['data-dsh-better-sidebar-settings-nav'] as const
+
 function directSvg(element: Element): SVGElement | undefined {
   return Array.from(element.children).find(child => child.tagName.toLowerCase() === 'svg') as SVGElement | undefined
 }
@@ -75,9 +78,10 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
     for (let index = 0; index < match.targets.length; index += 1) {
       const target = match.targets[index]!
       const button = match.buttons[index]!
+      const hasTrustedThirdPartyIcon = TRUSTED_THIRD_PARTY_SETTINGS_MARKERS.some(marker => button.hasAttribute(marker))
       const resolution = options.resolve(target, {
         hasOriginal: true,
-        originalIsGeneric: !NATIVE_SETTINGS_IDS.has(target.id),
+        originalIsGeneric: !NATIVE_SETTINGS_IDS.has(target.id) && !hasTrustedThirdPartyIcon,
       })
       if (resolution.iconId === null) {
         disposers.get(button)?.()

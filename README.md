@@ -68,6 +68,8 @@ Localized labels are display and search text only. They never decide a persisted
 
 The compatibility layer is intentionally narrow and reversible because DSH 0.1.x does not yet expose a public icon resolver. See [the design note](docs/design.md) for the contract and upstream direction.
 
+When `dsh-better-sidebar` is installed, its own Settings row icon is treated as a trusted original and preserved by default. It is replaced only when the user chooses `replace-generic` (or a manual override).
+
 ## Ecosystem checks
 
 Compatibility fixtures are pinned to real open-source registration excerpts, including `dsh-full-remote`, `dsh-context`, `dsh-openpencil`, `dsh-approve-for-me`, and `dsh-composer-polish`. They prove that an unknown Settings section is discovered generically, while contributions to unrelated surfaces are not misidentified. Details and pinned commits are in [ecosystem compatibility](docs/ecosystem-compatibility.md).

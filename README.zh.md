@@ -66,6 +66,8 @@ dsh plugin --profile web add link:"$PWD"
 
 DSH 0.1.x 尚未提供公共图标解析接口，因此当前兼容层刻意保持范围小、可逆、遇到歧义就停。完整契约和上游建议见[设计文档](docs/design.md)。
 
+同时安装 `dsh-better-sidebar` 时，其设置页自身图标会被视为可信原图标并默认保留；只有用户选择“替换通用回退图标”或手动覆盖时才会被替换。
+
 ## 外部插件兼容验证
 
 测试固定抽取了真实开源项目的注册源码片段，包括 `dsh-full-remote`、`dsh-context`、`dsh-openpencil`、`dsh-approve-for-me` 和 `dsh-composer-polish`。它们证明：未安装过的设置页插件仍能被通用发现，而其他插槽上的功能不会被误认成设置或侧边栏入口。来源和固定提交见[生态兼容记录](docs/ecosystem-compatibility.md)。
