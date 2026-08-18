@@ -16,5 +16,7 @@ export const Config = Schema.object({
 })
 
 export function normalizeConfig(value: unknown): IconThemeConfig {
-  return Config(value ?? {})
+  const normalized = Config(value ?? {}) as IconThemeConfig & { pack?: unknown }
+  delete normalized.pack
+  return normalized
 }
