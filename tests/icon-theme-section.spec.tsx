@@ -59,6 +59,18 @@ describe('IconThemeSection', () => {
     store.dispose()
   })
 
+  it('switches the original icon policy from the toolbar', async () => {
+    const { scope, store } = harness()
+    render(<IconThemeSection store={store} t={t} />)
+    const prefer = screen.getByRole('button', { name: '优先保留插件原图标' })
+    const replace = screen.getByRole('button', { name: '替换通用回退图标' })
+    expect(prefer.getAttribute('aria-pressed')).toBe('true')
+    fireEvent.click(replace)
+    await waitFor(() => expect(scope.writes).toContainEqual(['originalPolicy', 'replace-generic']))
+    expect(replace.getAttribute('aria-pressed')).toBe('true')
+    store.dispose()
+  })
+
   it('shows a gear placeholder and keep-original hint when a sidebar original is preserved', () => {
     const { scope, store } = harness([{ options: { id: 'chat-import' } }])
     render(<IconThemeSection store={store} t={t} />)

@@ -19,6 +19,7 @@ export const STYLE_TEXT = `
 .dit-button { min-height: 34px; padding: 6px 11px; }
 .dit-chip { min-height: 30px; padding: 4px 9px; font-size: 12px; }
 .dit-chip[aria-pressed="true"] { background: var(--dsw-alias-interactive-bg-hover); }
+.dit-policy { display: inline-flex; gap: 8px; }
 .dit-button:hover, .dit-chip:hover, .dit-icon-button:hover { background: var(--dsw-alias-interactive-bg-hover); }
 .dit-button:focus-visible, .dit-chip:focus-visible, .dit-icon-button:focus-visible, .dit-input:focus-visible { outline: 2px solid var(--dsw-alias-line-focus); outline-offset: 1px; }
 .dit-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; }

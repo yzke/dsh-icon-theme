@@ -95,6 +95,10 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
         {(['all', 'settings', 'sidebar', 'unrecognized', 'customized'] as const).map(value => (
           <button type="button" className="dit-chip" key={value} aria-pressed={filter === value} onClick={() => setFilter(value)}>{t(value)}</button>
         ))}
+        <div className="dit-policy" role="group" aria-label={t('originalPolicy')}>
+          <button type="button" className="dit-chip" aria-pressed={snapshot.config.originalPolicy === 'prefer'} disabled={!snapshot.writable} onClick={() => void store.setOriginalPolicy('prefer')}>{t('preferOriginal')}</button>
+          <button type="button" className="dit-chip" aria-pressed={snapshot.config.originalPolicy === 'replace-generic'} disabled={!snapshot.writable} onClick={() => void store.setOriginalPolicy('replace-generic')}>{t('replaceGeneric')}</button>
+        </div>
       </div>
 
       <div className="dit-list">
