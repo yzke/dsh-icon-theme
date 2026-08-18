@@ -1,5 +1,4 @@
 import { useMemo, useState, useSyncExternalStore } from 'react'
-import { EXACT_PRESETS } from './presets.ts'
 import type { IconThemeStore } from './store.ts'
 import type { Translate } from './locales.ts'
 import type { DetectedTarget, ResolutionSource, TargetKey } from './types.ts'
@@ -20,8 +19,8 @@ function sourceLabel(source: ResolutionSource, t: Translate): string {
   return t(source)
 }
 
-function previewIcon(target: DetectedTarget, iconId: string | null): string {
-  return iconId ?? EXACT_PRESETS[target.key] ?? 'settings'
+function previewIcon(iconId: string | null): string {
+  return iconId ?? 'settings'
 }
 
 function displayLabel(target: DetectedTarget, report: AdapterReport | undefined, t: Translate): string {
@@ -104,7 +103,10 @@ export function IconThemeSection({ store, t }: IconThemeSectionProps) {
           const nonIcon = targetStatus === 'non-icon'
           return (
             <div className="dit-row" key={target.key} data-target-key={target.key}>
-              <div className="dit-preview"><IconGlyph iconId={previewIcon(target, resolution.iconId)} /></div>
+              <div className="dit-preview">
+                <IconGlyph iconId={previewIcon(resolution.iconId)} />
+                {resolution.source === 'original' && <span className="dit-preview-hint">{t('originalPreviewHint')}</span>}
+              </div>
               <div className="dit-name">
                 <div className="dit-label">{label}</div>
                 <div className="dit-id">{target.key}</div>

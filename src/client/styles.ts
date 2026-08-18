@@ -24,8 +24,9 @@ export const STYLE_TEXT = `
 .dit-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
 .dit-report { border: 1px solid var(--dsw-alias-line-border); border-radius: 9px; padding: 6px 9px; }
 .dit-list { display: grid; gap: 8px; }
-.dit-row { display: grid; grid-template-columns: 32px minmax(120px, 1fr) minmax(100px, .8fr) auto; gap: 10px; align-items: center; border: 1px solid var(--dsw-alias-line-border); border-radius: 12px; padding: 10px 12px; background: var(--dsw-alias-bg-base); }
-.dit-preview { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--dsw-alias-interactive-bg-hover); }
+.dit-row { display: grid; grid-template-columns: 40px minmax(120px, 1fr) minmax(100px, .8fr) auto; gap: 10px; align-items: center; border: 1px solid var(--dsw-alias-line-border); border-radius: 12px; padding: 10px 12px; background: var(--dsw-alias-bg-base); }
+.dit-preview { width: 40px; min-height: 40px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: var(--dsw-alias-interactive-bg-hover); }
+.dit-preview-hint { font-size: 9px; line-height: 11px; color: var(--dsw-alias-label-secondary); text-align: center; max-width: 40px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .dit-name { min-width: 0; }
 .dit-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
 .dit-id { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--dsw-alias-label-secondary); font: 11px/16px ui-monospace, monospace; }
@@ -40,7 +41,7 @@ export const STYLE_TEXT = `
 .dit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 7px; margin-top: 10px; }
 .dit-grid-item { min-height: 64px; display: grid; place-items: center; gap: 4px; padding: 7px; border: 1px solid var(--dsw-alias-line-border); border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font-size: 11px; }
 .dit-grid-item:hover, .dit-grid-item[aria-current="true"] { background: var(--dsw-alias-interactive-bg-hover); }
-@media (max-width: 720px) { .dit-row { grid-template-columns: 32px minmax(0, 1fr) auto; } .dit-source { display: none; } }
+@media (max-width: 720px) { .dit-row { grid-template-columns: 40px minmax(0, 1fr) auto; } .dit-source { display: none; } }
 @media (prefers-reduced-motion: reduce) { .dit-root * { scroll-behavior: auto !important; } }
 `
 

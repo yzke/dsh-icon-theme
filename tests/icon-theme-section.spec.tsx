@@ -59,6 +59,25 @@ describe('IconThemeSection', () => {
     store.dispose()
   })
 
+  it('shows a gear placeholder and keep-original hint when a sidebar original is preserved', () => {
+    const { scope, store } = harness([{ options: { id: 'chat-import' } }])
+    render(<IconThemeSection store={store} t={t} />)
+    const row = screen.getByText('导入会话').closest('[data-target-key]') as HTMLElement
+    const preview = row.querySelector('.dit-preview') as HTMLElement
+    expect(preview.querySelector('[data-icon-id="settings"]')).toBeTruthy()
+    expect(within(preview).getByText('保留原图标')).toBeTruthy()
+    expect(scope.writes).toEqual([])
+    store.dispose()
+  })
+
+  it('does not show the keep-original hint for non-original resolutions', () => {
+    const { store } = harness()
+    render(<IconThemeSection store={store} t={t} />)
+    const row = screen.getByText('插件市场').closest('[data-target-key]') as HTMLElement
+    expect(row.querySelector('.dit-preview-hint')).toBeNull()
+    store.dispose()
+  })
+
   it('filters to unresolved targets without using localized labels for inference', () => {
     const { store } = harness()
     render(<IconThemeSection store={store} t={t} />)
