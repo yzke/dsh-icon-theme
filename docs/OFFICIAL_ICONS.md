@@ -1,7 +1,6 @@
-# Official DSH icons included in this fork
+# Official DSH icons
 
-This package is a fork of [dsh-icon-theme](https://github.com/yzke/dsh-icon-theme)
-that additionally embeds the official icon set from
+This package embeds the official icon set from
 `@deepseek-ai/dsh-client-ui-primitives` (MIT, © 2026 DeepSeek) into the icon
 picker, so users can choose those glyphs without any extra install.
 
