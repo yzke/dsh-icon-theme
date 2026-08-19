@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
 import { mountSidebarAdapter } from '../src/client/dom/sidebar-adapter.ts'
+import { MISMATCH_HOLD_MS, MISMATCH_HOLD_TRIES } from '../src/client/dom/mismatch-hold.ts'
 import { hasSidebarCompatibilityFingerprint, SIDEBAR_COMPATIBILITY } from '../src/client/sidebar-compat.ts'
 import type { DetectedTarget } from '../src/client/types.ts'
 
@@ -24,6 +25,10 @@ function slot(...children: HTMLElement[]): HTMLElement {
 
 function tick(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0))
+}
+
+function holdExpired(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, MISMATCH_HOLD_MS * MISMATCH_HOLD_TRIES + 30))
 }
 
 afterEach(() => { document.body.innerHTML = '' })
@@ -125,7 +130,7 @@ describe('mountSidebarAdapter', () => {
     })
     expect(action.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
     action.setAttribute('aria-label', 'Unrelated action')
-    await tick()
+    await holdExpired()
     expect(action.hasAttribute('data-dsh-icon-theme-managed')).toBe(false)
     dispose()
   })

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from 'vitest'
 import { mountSettingsAdapter } from '../src/client/dom/settings-adapter.ts'
+import { MISMATCH_HOLD_MS, MISMATCH_HOLD_TRIES } from '../src/client/dom/mismatch-hold.ts'
 import type { DetectedTarget, Resolution } from '../src/client/types.ts'
 
 function target(id: string, order: number): DetectedTarget {
@@ -32,6 +33,10 @@ function settingsDialog(ids: string[], auditedIdentity = true): HTMLElement {
 
 function tick(): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, 0))
+}
+
+function holdExpired(): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, MISMATCH_HOLD_MS * MISMATCH_HOLD_TRIES + 30))
 }
 
 afterEach(() => { document.body.innerHTML = '' })
@@ -144,6 +149,40 @@ describe('mountSettingsAdapter', () => {
     button.removeAttribute('data-dsh-better-sidebar-settings-nav')
     await tick()
     expect(button.hasAttribute('data-dsh-icon-theme-managed')).toBe(true)
+    dispose()
+  })
+
+  it('keeps applied glyphs across a transient nav mismatch, then stays applied', async () => {
+    const targets = [target('general', 0), target('market', 40)]
+    document.body.append(settingsDialog(['general', 'market']))
+    const dispose = mountSettingsAdapter({
+      getTargets: () => targets,
+      resolve: value => value.id === 'market'
+        ? { iconId: 'plugin.market', source: 'plugin', reason: 'reasonPlugin' }
+        : { iconId: null, source: 'original', reason: 'reasonOriginal' },
+    })
+    const market = document.querySelectorAll('nav button')[1] as HTMLButtonElement
+    expect(market.querySelector(':scope > [data-dsh-icon-theme-glyph]')).not.toBeNull()
+    const current = document.querySelector('[aria-current]') as HTMLButtonElement
+    current.removeAttribute('aria-current')
+    await tick()
+    expect(market.querySelector(':scope > [data-dsh-icon-theme-glyph]')).not.toBeNull()
+    current.setAttribute('aria-current', 'true')
+    await tick()
+    expect(market.querySelector(':scope > [data-dsh-icon-theme-glyph]')).not.toBeNull()
+    dispose()
+  })
+
+  it('clears glyphs after a persistent settings mismatch', async () => {
+    document.body.append(settingsDialog(['general', 'market']))
+    const dispose = mountSettingsAdapter({
+      getTargets: () => [target('general', 0), target('market', 40)],
+      resolve: () => ({ iconId: 'settings', source: 'preset', reason: 'reasonPreset' }),
+    })
+    expect(document.querySelector('[data-dsh-icon-theme-managed]')).not.toBeNull()
+    document.body.replaceChildren(settingsDialog(['general']))
+    await holdExpired()
+    expect(document.querySelector('[data-dsh-icon-theme-managed]')).toBeNull()
     dispose()
   })
 

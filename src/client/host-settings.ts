@@ -53,7 +53,7 @@ export class HostSettingsScope implements SettingsScopeLike {
     }
   }
 
-  private async reload(): Promise<void> {
+  reload = async (): Promise<void> => {
     try {
       await this.request({ action: 'read' })
     } catch {

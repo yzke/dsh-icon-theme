@@ -3,6 +3,7 @@ import { hasSidebarCompatibilityFingerprint, matchesSidebarCompatibility } from 
 import type { AdapterOptions, TargetAdapterStatus } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
 import { applyOwnedIcon, ownedIconMatches } from './owned-icon.ts'
+import { createMismatchHold } from './mismatch-hold.ts'
 
 function directSvg(element: Element): SVGElement | undefined {
   return Array.from(element.children).find(child => child.tagName.toLowerCase() === 'svg') as SVGElement | undefined
@@ -59,6 +60,8 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
     disposers.clear()
   }
 
+  const hold = createMismatchHold(() => schedule())
+
   const sync = (): void => {
     scheduled = false
     if (disposed) return
@@ -78,6 +81,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
       }
     }
     if (!slot) {
+      if (hold.hold(disposers.size > 0)) return
       clearAll()
       emit({
         status: 'waiting',
@@ -90,6 +94,8 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
     }
     const roots = Array.from(slot.children) as HTMLElement[]
     const matches = matchSidebarRoots(targets, roots)
+    if (matches.size === 0 && targets.length > 0 && hold.hold(disposers.size > 0)) return
+    hold.reset()
 
     const desired = new Set<HTMLElement>()
     let managed = 0
@@ -176,6 +182,7 @@ export function mountSidebarAdapter(options: AdapterOptions): () => void {
   const unsubscribe = options.subscribe?.(schedule) ?? (() => {})
   return () => {
     disposed = true
+    hold.dispose()
     bodyObserver.disconnect()
     slotObserver.disconnect()
     unsubscribe()

@@ -32,6 +32,18 @@ describe('HostSettingsScope', () => {
     expect(JSON.parse(String(calls[1]?.init?.body))).toMatchObject({ action: 'mutate', expectedRevision: 4 })
   })
 
+  it('can reload after the first read', async () => {
+    let reads = 0
+    const scope = new HostSettingsScope(async () => {
+      reads += 1
+      return jsonResponse({ ok: true, value: { originalPolicy: 'prefer' }, revision: reads, writable: true })
+    })
+    await expect.poll(() => scope.getSnapshot().status).toBe('ready')
+    await scope.reload()
+    expect(reads).toBe(2)
+    expect(scope.getSnapshot()).toMatchObject({ status: 'ready', writable: true })
+  })
+
   it('becomes unavailable when the Host endpoint is absent', async () => {
     const scope = new HostSettingsScope(async () => jsonResponse({ ok: false, error: 'missing' }, 404))
     await expect.poll(() => scope.getSnapshot().status).toBe('unavailable')

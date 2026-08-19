@@ -16,6 +16,7 @@ export interface SettingsScopeLike {
   subscribe: (listener: () => void) => () => void
   set: (field: string, value: unknown) => Promise<void>
   unset: (field: string) => Promise<void>
+  reload?: () => Promise<void>
 }
 
 export interface SlotLedgerLike {

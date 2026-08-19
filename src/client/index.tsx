@@ -25,6 +25,7 @@ interface IconThemeClientContext {
   effect: (callback: () => unknown, label?: string) => void
   locale: LocaleServiceLike
   slots: SlotsServiceLike
+  on?: (event: string, listener: () => void) => () => void
 }
 
 export const name = 'dsh-icon-theme'
@@ -59,6 +60,11 @@ function install(ctx: IconThemeClientContext, scope: SettingsScopeLike): void {
   }
   ctx.effect(() => mountSettingsAdapter(adapterOptions), 'dsh-icon-theme: settings adapter')
   ctx.effect(() => mountSidebarAdapter(adapterOptions), 'dsh-icon-theme: sidebar adapter')
+  if (typeof ctx.on === 'function') {
+    ctx.effect(() => ctx.on!('connection/reset', () => {
+      void Promise.resolve(scope.reload?.()).finally(() => store.refresh())
+    }), 'dsh-icon-theme: reconnect')
+  }
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',

@@ -1,6 +1,6 @@
 {
   "name": "dsh-icon-theme",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Auto-detected, user-customizable icons for DeepSeek Harness settings and sidebar surfaces.",
   "type": "module",
   "main": "lib/index.js",

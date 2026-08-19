@@ -12,6 +12,46 @@ describe('client lifecycle', () => {
     expect(inject).toEqual(['slots', 'locale'])
   })
 
+  it('reloads settings when the host emits connection/reset', async () => {
+    let reloads = 0
+    let reset: (() => void) | undefined
+    const scope: SettingsScopeLike = {
+      getSnapshot: () => ({ status: 'ready', value: {}, writable: true }),
+      subscribe: () => () => {},
+      set: async () => {},
+      unset: async () => {},
+      reload: async () => { reloads += 1 },
+    }
+    const slots = {
+      entriesOfSlot: () => [],
+      subscribe: () => () => {},
+      inject: () => {},
+      register: () => () => {},
+    }
+    const effects: Array<() => void> = []
+    applyWithSettings({
+      effect(callback) {
+        const result = callback()
+        if (typeof result === 'function') effects.push(result)
+      },
+      locale: {
+        register: () => () => {},
+        bind: () => (key: string) => key,
+        subscribe: () => () => {},
+      },
+      slots,
+      on(event, listener) {
+        if (event === 'connection/reset') reset = listener
+        return () => { reset = undefined }
+      },
+    }, scope)
+    expect(reset).toBeTypeOf('function')
+    reset!()
+    await tick()
+    expect(reloads).toBe(1)
+    effects.reverse().forEach(dispose => dispose())
+  })
+
   it('registers one section and removes observers, styles, and markers on disposal', async () => {
     const effects: Array<() => void> = []
     const injected: Array<() => void> = []

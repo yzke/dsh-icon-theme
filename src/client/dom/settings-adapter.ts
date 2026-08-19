@@ -3,6 +3,7 @@ import type { DetectedTarget, Resolution } from '../types.ts'
 import type { AdapterOptions, AdapterReport } from './adapter-types.ts'
 import { reportOnce } from './adapter-types.ts'
 import { applyOwnedIcon, ownedIconMatches } from './owned-icon.ts'
+import { createMismatchHold } from './mismatch-hold.ts'
 
 interface SettingsMatch {
   buttons: HTMLButtonElement[]
@@ -56,14 +57,17 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
 
   const report = (value: AdapterReport): void => emit(value)
 
+  const hold = createMismatchHold(() => schedule())
+
   const sync = (): void => {
     scheduled = false
     if (disposed) return
     const targets = options.getTargets().filter(target => target.surface === 'settings.section')
     const match = findSettingsMatch(targets)
     if (!match) {
-      clearAll()
       const hasDialog = settingsDialogs().length > 0
+      if (hold.hold(hasDialog && disposers.size > 0)) return
+      clearAll()
       report({
         status: hasDialog ? 'unsupported' : 'waiting',
         managed: 0,
@@ -72,6 +76,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
       })
       return
     }
+    hold.reset()
 
     const desired = new Set<HTMLElement>()
     const targetResolutions: Partial<Record<DetectedTarget['key'], Resolution>> = {}
@@ -130,6 +135,7 @@ export function mountSettingsAdapter(options: AdapterOptions): () => void {
 
   return () => {
     disposed = true
+    hold.dispose()
     observer.disconnect()
     unsubscribe()
     clearAll()
