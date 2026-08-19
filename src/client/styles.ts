@@ -19,7 +19,14 @@ export const STYLE_TEXT = `
 .dit-button { min-height: 34px; padding: 6px 11px; }
 .dit-chip { min-height: 30px; padding: 4px 9px; font-size: 12px; }
 .dit-chip[aria-pressed="true"] { background: var(--dsw-alias-interactive-bg-hover); }
-.dit-policy { display: inline-flex; gap: 8px; }
+.dit-policy { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dit-policy-label { color: var(--dsw-alias-label-secondary); font-size: 12px; line-height: 18px; }
+.dit-policy-group { display: inline-flex; border: 1px solid var(--dsw-alias-line-border); border-radius: 9px; overflow: hidden; background: var(--dsw-alias-bg-base); }
+.dit-policy-group .dit-chip { border: 0; border-radius: 0; background: transparent; }
+.dit-policy-group .dit-chip + .dit-chip { border-left: 1px solid var(--dsw-alias-line-border); }
+.dit-policy-group .dit-chip[aria-pressed="true"] { background: transparent; box-shadow: inset 0 0 0 1px var(--dsw-alias-line-focus); }
+.dit-policy-group .dit-chip:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.dit-policy-group .dit-chip[aria-pressed="true"]:hover { background: transparent; }
 .dit-button:hover, .dit-chip:hover, .dit-icon-button:hover { background: var(--dsw-alias-interactive-bg-hover); }
 .dit-button:focus-visible, .dit-chip:focus-visible, .dit-icon-button:focus-visible, .dit-input:focus-visible { outline: 2px solid var(--dsw-alias-line-focus); outline-offset: 1px; }
 .dit-summary { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; color: var(--dsw-alias-label-secondary); font-size: 12px; }
@@ -41,6 +48,7 @@ export const STYLE_TEXT = `
 .dit-picker-title { font-size: 16px; font-weight: 600; }
 .dit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 7px; margin-top: 10px; }
 .dit-grid-item { min-height: 64px; display: grid; place-items: center; gap: 4px; padding: 7px; border: 1px solid var(--dsw-alias-line-border); border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font-size: 11px; }
+.dit-grid-mark { font-size: 9px; line-height: 11px; color: var(--dsw-alias-label-secondary); }
 .dit-grid-item:hover, .dit-grid-item[aria-current="true"] { background: var(--dsw-alias-interactive-bg-hover); }
 @media (max-width: 720px) { .dit-row { grid-template-columns: 40px minmax(0, 1fr) auto; } .dit-source { display: none; } }
 @media (prefers-reduced-motion: reduce) { .dit-root * { scroll-behavior: auto !important; } }

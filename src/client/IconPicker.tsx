@@ -37,6 +37,7 @@ export function IconPicker({ current, t, onChoose, onClose }: IconPickerProps) {
         <div className="dit-grid">
           {icons.map(icon => {
             const label = isEnglish ? icon.labelEn : icon.label
+            const official = icon.source.includes('dsh-client-ui-primitives')
             return (
             <button
               type="button"
@@ -48,6 +49,7 @@ export function IconPicker({ current, t, onChoose, onClose }: IconPickerProps) {
             >
               <IconGlyph iconId={icon.id} />
               <span>{label}</span>
+              {official && <span className="dit-grid-mark" aria-hidden>{t('officialMark')}</span>}
             </button>
             )
           })}

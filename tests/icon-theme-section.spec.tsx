@@ -48,6 +48,7 @@ describe('IconThemeSection', () => {
     render(<IconThemeSection store={store} t={t} />)
     const row = screen.getByText('插件市场').closest('[data-target-key]') as HTMLElement
     fireEvent.click(within(row).getByRole('button', { name: '更改' }))
+    expect(screen.getAllByText('官方').length).toBeGreaterThan(0)
     const appsButton = screen.getAllByRole('button', { name: '插件' })
       .find(button => button.querySelector('[data-icon-id="apps"]'))!
     fireEvent.click(appsButton)
@@ -66,6 +67,8 @@ describe('IconThemeSection', () => {
     render(<IconThemeSection store={store} t={t} />)
     const prefer = screen.getByRole('button', { name: '优先保留插件原图标' })
     const replace = screen.getByRole('button', { name: '替换通用回退图标' })
+    expect(prefer.textContent).toBe('保留原图标')
+    expect(replace.textContent).toBe('替换回退')
     expect(prefer.getAttribute('aria-pressed')).toBe('true')
     fireEvent.click(replace)
     await waitFor(() => expect(scope.writes).toContainEqual(['originalPolicy', 'replace-generic']))
@@ -79,7 +82,7 @@ describe('IconThemeSection', () => {
     const row = screen.getByText('导入会话').closest('[data-target-key]') as HTMLElement
     const preview = row.querySelector('.dit-preview') as HTMLElement
     expect(preview.querySelector('[data-icon-id="settings"]')).toBeTruthy()
-    expect(within(preview).getByText('保留原图标')).toBeTruthy()
+    expect(within(preview).getByText('原图标')).toBeTruthy()
     expect(scope.writes).toEqual([])
     store.dispose()
   })
