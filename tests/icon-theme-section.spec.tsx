@@ -48,7 +48,9 @@ describe('IconThemeSection', () => {
     render(<IconThemeSection store={store} t={t} />)
     const row = screen.getByText('插件市场').closest('[data-target-key]') as HTMLElement
     fireEvent.click(within(row).getByRole('button', { name: '更改' }))
-    fireEvent.click(screen.getByRole('button', { name: '插件' }))
+    const appsButton = screen.getAllByRole('button', { name: '插件' })
+      .find(button => button.querySelector('[data-icon-id="apps"]'))!
+    fireEvent.click(appsButton)
     await waitFor(() => expect(scope.writes).toEqual([
       ['overrides', { 'settings.section:market': 'apps' }],
     ]))
